@@ -124,7 +124,14 @@ while ($true) {
         if ($d.ManualChests -and $d.ManualChests.PSObject.Properties.Name -contains $profile) {
             $manualAdj = [int]$d.ManualChests.$profile
         }
-        $liveTotal = [math]::Max(0, $countedLive + $manualAdj)
+        # Confirmed starting point (ChestBaselines): replays already there when it was read are
+        # not added twice; only chests counted afterwards grow the counter.
+        $baseTotal = $countedLive
+        if ($d.ChestBaselines -and $d.ChestBaselines.PSObject.Properties.Name -contains $profile) {
+            $b = $d.ChestBaselines.$profile
+            $baseTotal = [int]$b.Total + [math]::Max(0, $countedLive - [int]$b.Counted)
+        }
+        $liveTotal = [math]::Max(0, $baseTotal + $manualAdj)
         $fmtNum = { param($x) [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $x) }
         $liveTotalText = & $fmtNum $liveTotal
         $liveSquadText = & $fmtNum ($liveTotal + $teamLive)
@@ -443,9 +450,8 @@ $($rows.ToString())
                 $o = $o -replace $stripThourOverlay, ''
                 $numPattern = '(<div class="total"[^>]*>.*?</svg>)[\d,]+(</div>)'
                 if ($o -match $numPattern) {
-                    if ($Matches[1] + $liveTotalText + $Matches[2] -ne [regex]::Match($o, $numPattern).Value) {
-                        $o = $o -replace $numPattern, ('${1}' + $liveTotalText + '${2}')
-                    }
+                    # Leave the number alone: the program refreshes overlay.html with the live
+                    # match included. Only the report (rewritten less often) is synced above.
                     $divPattern = '(<div class="total"[^>]*>.*?</div>)'
                     if ($o -match $divPattern) {
                         # Only you + squad here. Prizes stay in their own report section.
