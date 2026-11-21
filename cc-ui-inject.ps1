@@ -147,8 +147,10 @@ while ($true) {
 
             # Confirmed total from Fortnite (cc-counts.json) + replay breakdown.
             if ($mine) {
-                $h = $h -replace '<span ' + $openedMarker + '[^>]*>[\s\S]*?</span>', ''
-                $h = $h -replace '<span ' + $replayMarker + '[^>]*>[\s\S]*?</span>', ''
+                $stripOpenedSpan = '<span ' + $openedMarker + '[^>]*>[\s\S]*?</span>'
+                $stripReplaySpan = '<span ' + $replayMarker + '[^>]*>[\s\S]*?</span>'
+                $h = $h -replace $stripOpenedSpan, ''
+                $h = $h -replace $stripReplaySpan, ''
                 $numPattern = '(<div class="k">Chests in total</div><div class="v num">)[\d,]+(</div>)'
                 if ($h -match $numPattern) {
                     $h = $h -replace $numPattern, ('${1}' + $confirmedText + '${2}')
@@ -178,10 +180,9 @@ $($friendRows.ToString())
 "@
                 $oldLast = [regex]::Match($h, '<section class="card" ' + $lastMatchMarker + '[\s\S]*?</section>')
                 if ($oldLast.Success) { $h = $h.Remove($oldLast.Index, $oldLast.Length) }
-                $lastAnchor = $h.IndexOf('<section><h2 class="pirate">Chests per day')
-                if ($lastAnchor -lt 0) { $lastAnchor = $h.IndexOf('<section class="card" ' + $prizeMarker) }
-                if ($lastAnchor -ge 0) {
-                    $h = $h.Insert($lastAnchor, $lastSection)
+                $tilesClose = $h.IndexOf('</section>')
+                if ($tilesClose -ge 0) {
+                    $h = $h.Insert($tilesClose + '</section>'.Length, $lastSection)
                 } elseif ($h -match '</main>') {
                     $h = $h -replace '</main>', "$lastSection</main>"
                 }
@@ -262,16 +263,12 @@ $($rows.ToString())
 </section>
 "@
 
-            # replace an existing section with the fresh one, else insert before the collection card
-            # drop any old copy, then place the fresh one right after the weekly/season chance cards
+            # The prizes keep their original place in the program's own "collection"
+            # and "treasures" sections. Drop our extra table so the page stays short.
             $existing = [regex]::Match($h, '<section class="card" ' + $prizeMarker + '[\s\S]*?</section>')
-            if ($existing.Success) { $h = $h.Remove($existing.Index, $existing.Length) }
-            $anchorIdx = $h.IndexOf('<section class="fold closed" data-fold="seen"')
-            if ($anchorIdx -lt 0) { $anchorIdx = $h.IndexOf('<section class="fold closed" data-fold="collection"') }
-            if ($anchorIdx -ge 0) {
-                $h = $h.Insert($anchorIdx, $newSection)
-            } elseif ($h -match '</main>') {
-                $h = $h -replace '</main>', "$newSection</main>"
+            if ($existing.Success) {
+                $h = $h.Remove($existing.Index, $existing.Length)
+                $changed = $true
             }
             if ($h -ne (Get-Content $reportPath -Raw)) { $changed = $true }
 
@@ -289,18 +286,26 @@ $($rows.ToString())
                 $oChanged = $true
             }
             if ($mine) {
-                $o = $o -replace '<div class="r" ' + $openedMarker + '[^>]*>[\s\S]*?</div>', ''
-                $o = $o -replace '<div class="r" ' + $replayMarker + '[^>]*>[\s\S]*?</div>', ''
-                $o = $o -replace '<div class="r" ' + $friendMarker + '[^>]*>[\s\S]*?</div>', ''
+                # Strip every old injected row first. The pattern must be built in a
+                # variable: inline `+` concatenation makes -replace miss the match,
+                # which stacks duplicate rows on every watcher pass.
+                $stripOpened = '<div class="r" ' + $openedMarker + '[^>]*>[\s\S]*?</div>'
+                $stripReplay = '<div class="r" ' + $replayMarker + '[^>]*>[\s\S]*?</div>'
+                $stripFriends = '<div class="r" ' + $friendMarker + '[^>]*>[\s\S]*?</div>'
+                $stripLast = '<div class="r" ' + $lastMatchMarker + '[^>]*>[\s\S]*?</div>'
+                $o = $o -replace $stripOpened, ''
+                $o = $o -replace $stripReplay, ''
+                $o = $o -replace $stripFriends, ''
+                $o = $o -replace $stripLast, ''
                 $numPattern = '(<div class="total"[^>]*>.*?</svg>)[\d,]+(</div>)'
                 if ($o -match $numPattern) {
                     $o = $o -replace $numPattern, ('${1}' + $confirmedText + '${2}')
                     $divPattern = '(<div class="total"[^>]*>.*?</div>)'
                     if ($o -match $divPattern) {
-                        $confirmedDiv = "<div class=`"r`" $openedMarker>Confirmed $confirmedText &middot; T$($counts.treasure) R$($counts.rare) S$($counts.sprite)</div>"
-                        $replayDiv = "<div class=`"r`" $replayMarker>Replay $openedText opened &middot; $brokenText broken</div>"
+                        # Only you + squad here. Prizes stay in their own report section.
+                        $lastMatchDiv = "<div class=`"r`" $lastMatchMarker>You <b>$lastOpened</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime</div>"
                         $friendDiv = "<div class=`"r`" $friendMarker>$friendText</div>"
-                        $o = $o -replace $divPattern, ('${1}' + $confirmedDiv + $replayDiv + $friendDiv)
+                        $o = $o -replace $divPattern, ('${1}' + $lastMatchDiv + $friendDiv)
                     }
                     $oChanged = $true
                 }
