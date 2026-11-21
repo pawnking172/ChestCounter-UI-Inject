@@ -98,17 +98,19 @@ while ($true) {
                 if ($c.Destroyed) { $lastBroken++ } else { $lastOpened++ }
             }
         }
+        $lastTotal = $lastOpened + $lastBroken
+        $lastTotalText = "<b>$lastTotal</b>"
         $lastTime = if ($last) { [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm') } else { '--:--' }
         $friendRows = New-Object System.Text.StringBuilder
         $friendBits = New-Object System.Collections.Generic.List[string]
         foreach ($tm in @($last.TeamChests)) {
             $tmName = Html ([string]$tm.Name)
             $tmOpened = [math]::Max(0, [int]$tm.Chests - [int]$tm.Destroyed)
-            [void]$friendRows.AppendLine("<tr><td>$tmName</td><td>$tmOpened</td><td>$($tm.Destroyed)</td></tr>")
-            [void]$friendBits.Add("$tmName $tmOpened")
+            [void]$friendRows.AppendLine("<tr><td>$tmName</td><td>$tmOpened</td><td>$($tm.Destroyed)</td><td><b>$($tm.Chests)</b></td></tr>")
+            [void]$friendBits.Add("$tmName $tmOpened ($($tm.Chests) total)")
         }
         if ($friendRows.Length -eq 0) {
-            [void]$friendRows.AppendLine('<tr><td colspan="3" class="muted">No teammates in this replay</td></tr>')
+            [void]$friendRows.AppendLine('<tr><td colspan="4" class="muted">No teammates in this replay</td></tr>')
             $friendText = '<span class="muted">no teammates</span>'
         } else {
             $friendText = $friendBits -join ' &middot; '
@@ -165,7 +167,7 @@ while ($true) {
                     $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
                     $cleanTiles = @"
 <section class="tiles hassquad">
-  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
+  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
   <div class="tile squadtile"><div class="v num">$squadText</div><div class="l">squad total<br>you + $teamText by your teammates</div></div>
   <div class="tile"><div class="v num">$(& $fmtNum $matchCount)</div><div class="l">matches analyzed</div></div>
   <div class="tile"><div class="v num">$avgText</div><div class="l">chests per match</div></div>
@@ -200,7 +202,7 @@ while ($true) {
                     $h = $h -replace $numPattern, ('${1}' + $confirmedText + '${2}')
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
-                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastOpened</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
+                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
                         $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span>"
                         $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
                         $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $confirmedLine + $replayLine)
@@ -214,11 +216,11 @@ while ($true) {
                 $lastSection = @"
 <section class="card" $lastMatchMarker style="padding:16px 18px;margin-top:18px">
 <h2>Last match &mdash; you &amp; squad</h2>
-<p class="muted">$lastTime &middot; You opened <b>$lastOpened</b> &middot; Team opened <b>$($last.TeamChestsOpened)</b></p>
+<p class="muted">$lastTime &middot; You opened <b>$lastOpened</b> + $lastBroken broken = <b>$lastTotal</b> total &middot; Team opened <b>$($last.TeamChestsOpened)</b></p>
 <table class="ctable" style="width:100%;table-layout:auto">
-<thead><tr><th>Player</th><th style="width:110px">Opened</th><th style="width:110px">Broken</th></tr></thead>
+<thead><tr><th>Player</th><th style="width:100px">Opened</th><th style="width:100px">Broken</th><th style="width:100px">Total</th></tr></thead>
 <tbody>
-<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td>$lastOpened</td><td>$lastBroken</td></tr>
+<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td>$lastOpened</td><td>$lastBroken</td><td><b>$lastTotal</b></td></tr>
 $($friendRows.ToString())
 </tbody></table>
 </section>
@@ -348,7 +350,7 @@ $($rows.ToString())
                     $divPattern = '(<div class="total"[^>]*>.*?</div>)'
                     if ($o -match $divPattern) {
                         # Only you + squad here. Prizes stay in their own report section.
-                        $lastMatchDiv = "<div class=`"r`" $lastMatchMarker>You <b>$lastOpened</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime</div>"
+                        $lastMatchDiv = "<div class=`"r`" $lastMatchMarker>You <b>$lastOpened</b> + $lastBroken broken = <b>$lastTotal</b> total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime</div>"
                         $friendDiv = "<div class=`"r`" $friendMarker>$friendText</div>"
                         $o = $o -replace $divPattern, ('${1}' + $lastMatchDiv + $friendDiv)
                     }
