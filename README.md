@@ -4,19 +4,19 @@
 
 ## تحميل النسخة المعدّلة
 
-- أحدث نسخة (1.5.2): https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
-- تحميل مباشر: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/download/v1.5.2/ChestCounter.exe
+- أحدث نسخة: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
+- تحميل مباشر: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest/download/ChestCounter.exe
 
 زر **Check for updates** داخل البرنامج يفحص هذا الريبو مباشرة؛ أي تعديل جديد ننشره كريليز برقم أعلى و asset اسمه `ChestCounter.exe` ويوصله الزر تلقائياً. بياناتك وإعداداتك محفوظة.
 
 ## وش فيه جديد على الأصلي
 
 1. سطر `Last: <عدد> chests @ <وقت> | Team: <عدد>` جنب التوتال في `report.html` و `overlay.html`.
-2. جدول **All treasure prizes — every week** تحت كرت `Your chances` في `report.html`: كل جوائز الأسابيع الخمسة + Pirate Shop (26 جائزة) مع الصور والاحتمالات وحالة كل جائزة.
-3. حالة الجائزة تجي من ريبلايز اللاعب، أو ريبلايز الفريق، أو الملف اليدوي `cc-prize-manual.json`.
+2. الجوايز تبقى في أقسام البرنامج الأصلية (`Your collection` / `Treasures found`) وما ينضاف لها جدول إضافي عشان الصفحة ما تطول.
 4. التوتال المعروض هو العدد المؤكد من Fortnite في `cc-counts.json` ( treasure / rare / sprite )، مع سطر منفصل لعدد الريبلايز.
 5. قسم `Last match — you & squad`: آخر مباراة، كم فتحت أنت، كم فتح الفريق، واسم كل صديق وعدّه بالضبط.
-6. المراقب يعيد الحقن تلقائياً بعد كل مرة البرنامج يعيد كتابة `report.html` / `overlay.html`.
+6. الـ overlay يعرض بس: التوتال + «You … · Team …» + أسماء الأصدقاء وعددهم. ما فيه جوائز ولا تكرار صفوف.
+7. المراقب يعيد الحقن تلقائياً بعد كل مرة البرنامج يعيد كتابة `report.html` / `overlay.html`.
 
 ## العدد المؤكد من Fortnite
 
