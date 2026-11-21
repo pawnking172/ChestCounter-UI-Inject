@@ -200,7 +200,11 @@ while ($true) {
                         if ($n -gt $bestMatch) { $bestMatch = $n }
                     }
                     $matchCount = @($mine).Count
-                    $squadText = & $fmtNum ($confirmedTotal + $teamChests)
+                    # Keep the numbers ChestCounter generated: they grow when a new chest is counted.
+                    $heroNum = [regex]::Match($tilesMatch.Value, '<div class="k">Chests in total</div><div class="v num">([\d,]+)</div>').Groups[1].Value
+                    if (-not $heroNum) { $heroNum = $confirmedText }
+                    $squadText = [regex]::Match($tilesMatch.Value, '<div class="v num">([\d,]+)</div><div class="l">squad total').Groups[1].Value
+                    if (-not $squadText) { $squadText = & $fmtNum ($confirmedTotal + $teamChests) }
                     $teamText = & $fmtNum $teamChests
                     $bestText = & $fmtNum $bestMatch
                     $findText = & $fmtNum $ownFinds
@@ -209,7 +213,7 @@ while ($true) {
                     $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
                     $cleanTiles = @"
 <section class="tiles hassquad">
-  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
+  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$heroNum</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
   <div class="tile squadtile"><div class="v num">$squadText</div><div class="l">squad total<br>you + $teamText by your teammates</div></div>
   <div class="tile"><div class="v num">$(& $fmtNum $matchCount)</div><div class="l">matches analyzed</div></div>
   <div class="tile"><div class="v num">$avgText</div><div class="l">chests per match</div></div>
@@ -243,11 +247,11 @@ while ($true) {
                 $h = $h -replace $stripReplaySpan, ''
                 $numPattern = '(<div class="k">Chests in total</div><div class="v num">)[\d,]+(</div>)'
                 if ($h -match $numPattern) {
-                    $h = $h -replace $numPattern, ('${1}' + $confirmedText + '${2}')
+                    # Never overwrite the number: the program recounts it on every replay.
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
                         $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
-                        $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span>"
+                        $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b> (grows with new chests)</span>"
                         $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
                         $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $confirmedLine + $replayLine)
                     }
@@ -408,7 +412,7 @@ $($rows.ToString())
                 $o = $o -replace $stripThourOverlay, ''
                 $numPattern = '(<div class="total"[^>]*>.*?</svg>)[\d,]+(</div>)'
                 if ($o -match $numPattern) {
-                    $o = $o -replace $numPattern, ('${1}' + $confirmedText + '${2}')
+                    # Leave the total alone: the program updates it when a chest is counted.
                     $divPattern = '(<div class="total"[^>]*>.*?</div>)'
                     if ($o -match $divPattern) {
                         # Only you + squad here. Prizes stay in their own report section.
