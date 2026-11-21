@@ -18,8 +18,6 @@ $replayMarker = 'data-cc-replay'
 $lastMatchMarker = 'data-cc-lastmatch'
 $friendMarker = 'data-cc-friends'
 $heroLastMarker = 'data-cc-hero-last'
-$thourMarker = 'data-cc-thour'
-$thourScriptMarker = 'data-cc-thour-script'
 
 $kindNames = @{
     'outfit' = 'Gold Outfit'
@@ -39,16 +37,6 @@ function Write-Atomic([string]$path, [string]$content) {
 
 function Html([string]$s) { $s -replace '&','&amp;' -replace '<','&lt;' -replace '>','&gt;' }
 function UtcTime([string]$s) { [datetimeoffset]::Parse($s).UtcDateTime }
-function DurationText([timespan]$t) {
-    if ($t.TotalSeconds -le 0) { return 'now' }
-    $s = [int][math]::Floor($t.TotalSeconds)
-    $d = [int][math]::Floor($s / 86400)
-    $h = [int][math]::Floor(($s % 86400) / 3600)
-    $m = [int][math]::Floor(($s % 3600) / 60)
-    $sec = $s % 60
-    if ($d -gt 0) { return "$d d $h h $m m" }
-    return "$h h $m m $sec s"
-}
 
 # prize id (content.json "id", e.g. w3-car) that the replay data misses.
 # Entries are either a plain id (you got it) or { id, by: "squad"|"you", note }.
@@ -165,47 +153,9 @@ while ($true) {
                 [void]$boostBits.Add("$label &times;$([string]::Format([Globalization.CultureInfo]::InvariantCulture,'{0:0.#}',$b)) &rarr; 1 in $([string]::Format([Globalization.CultureInfo]::InvariantCulture,'{0:N0}',$newOdds))")
             }
         }
-        if ($showHour) {
-            if ($liveHour) {
-                $targetUtc = UtcTime ([string]$showHour.end)
-                $endLocal = $targetUtc.ToLocalTime()
-                $thourText = "Treasure Hour LIVE now &middot; until $($endLocal.ToString('HH:mm'))"
-                $cdPre = 'ends in'
-            } else {
-                $targetUtc = UtcTime ([string]$showHour.start)
-                $startLocal = $targetUtc.ToLocalTime()
-                $thourText = "Next Treasure Hour $($startLocal.ToString('ddd d MMM HH:mm'))"
-                $cdPre = 'starts in'
-            }
-            $targetMs = [DateTimeOffset]::new($targetUtc, [TimeSpan]::Zero).ToUnixTimeMilliseconds()
-            $cdText = DurationText ($targetUtc - $nowUtc)
-            $thourText += " &middot; <b data-cc-countdown data-ts=`"$targetMs`" data-pre=`"$cdPre`">$cdPre $cdText</b>"
-            if ($boostBits.Count -gt 0) { $thourText += ' &mdash; ' + ($boostBits -join ' &middot; ') }
-            if (-not $showHour.confirmed) { $thourText += ' &middot; expected, not announced yet' }
-        } else {
-            $thourText = 'Treasure Hour: no announced window left this season'
-        }
-        $thourLine = "<span style=`"display:block`" $thourMarker>$thourText</span>"
-
-        # The page's own banner already ticks; this one ticks our injected line too.
-        $thourScript = @"
-<script data-cc-thour-script>
-(function(){
-  function fmt(ms){
-    if(ms<=0) return 'now';
-    var s=Math.floor(ms/1000), d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), x=s%60;
-    return (d?d+'d ':'')+h+'h '+m+'m '+(d?'':x+'s');
-  }
-  function tick(){
-    var el=document.querySelector('[data-cc-countdown]');
-    if(!el) return;
-    var left=parseInt(el.getAttribute('data-ts'),10)-Date.now();
-    el.textContent=(el.getAttribute('data-pre')||'')+' '+fmt(left);
-  }
-  tick(); setInterval(tick,1000);
-})();
-</script>
-"@
+        # The report's own "Your chances" banner draws the live time/countdown itself.
+        # Never write a ticking value into the HTML: it changes every second and makes the
+        # watcher rewrite the file (and the browser reload it) over and over -> flicker.
 
         # prizeId -> own/team counts + last date (own finds first, then team finds)
         $got = @{}
@@ -259,7 +209,7 @@ while ($true) {
                     $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
                     $cleanTiles = @"
 <section class="tiles hassquad">
-  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $thourMarker>$thourText</span><span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
+  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
   <div class="tile squadtile"><div class="v num">$squadText</div><div class="l">squad total<br>you + $teamText by your teammates</div></div>
   <div class="tile"><div class="v num">$(& $fmtNum $matchCount)</div><div class="l">matches analyzed</div></div>
   <div class="tile"><div class="v num">$avgText</div><div class="l">chests per match</div></div>
@@ -286,7 +236,7 @@ while ($true) {
                 $stripOpenedSpan = '(?:(?:<br>|\s)*)<span[^>]*' + $openedMarker + '[^>]*>[\s\S]*?</span>'
                 $stripReplaySpan = '(?:(?:<br>|\s)*)<span[^>]*' + $replayMarker + '[^>]*>[\s\S]*?</span>'
                 $stripHeroLast = '(?:(?:<br>|\s)*)<span[^>]*' + $heroLastMarker + '[^>]*>[\s\S]*?</span>'
-                $stripThour = '(?:(?:<br>|\s)*)<span[^>]*' + $thourMarker + '[^>]*>[\s\S]*?</span>'
+                $stripThour = '(?:(?:<br>|\s)*)<span[^>]*data-cc-thour[^>]*>[\s\S]*?</span>'
                 $h = $h -replace $stripHeroLast, ''
                 $h = $h -replace $stripThour, ''
                 $h = $h -replace $stripOpenedSpan, ''
@@ -299,19 +249,15 @@ while ($true) {
                         $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
                         $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span>"
                         $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
-                        $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $thourLine + $confirmedLine + $replayLine)
+                        $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $confirmedLine + $replayLine)
                     }
                     $changed = $true
                 }
             }
 
-            # Keep exactly one live countdown script in the page.
-            $oldThourScript = '<script[^>]*' + $thourScriptMarker + '[^>]*>[\s\S]*?</script>'
+            # Self-heal pages written by earlier builds: drop the injected ticker script.
+            $oldThourScript = '<script[^>]*data-cc-thour-script[^>]*>[\s\S]*?</script>'
             $h = $h -replace $oldThourScript, ''
-            $bodyClose = $h.LastIndexOf('</body>')
-            if ($bodyClose -ge 0) {
-                $h = $h.Insert($bodyClose, $thourScript)
-            }
 
             # Last match: you vs squad, with every teammate's username and count.
             if ($last) {
@@ -454,7 +400,7 @@ $($rows.ToString())
                 $stripReplay = '<div class="r" ' + $replayMarker + '[^>]*>[\s\S]*?</div>'
                 $stripFriends = '<div class="r" ' + $friendMarker + '[^>]*>[\s\S]*?</div>'
                 $stripLast = '<div class="r" ' + $lastMatchMarker + '[^>]*>[\s\S]*?</div>'
-                $stripThourOverlay = '(?:(?:<br>|\s)*)<span[^>]*' + $thourMarker + '[^>]*>[\s\S]*?</span>'
+                $stripThourOverlay = '(?:(?:<br>|\s)*)<span[^>]*data-cc-thour[^>]*>[\s\S]*?</span>'
                 $o = $o -replace $stripOpened, ''
                 $o = $o -replace $stripReplay, ''
                 $o = $o -replace $stripFriends, ''
@@ -468,15 +414,10 @@ $($rows.ToString())
                         # Only you + squad here. Prizes stay in their own report section.
                         $lastMatchDiv = "<div class=`"r`" $lastMatchMarker>You <b>$lastOpened</b> + $lastBroken broken = <b>$lastTotal</b> total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime</div>"
                         $friendDiv = "<div class=`"r`" $friendMarker>$friendText</div>"
-                        $o = $o -replace $divPattern, ('${1}' + $lastMatchDiv + $friendDiv + $thourLine)
+                        $o = $o -replace $divPattern, ('${1}' + $lastMatchDiv + $friendDiv)
                     }
-                    # One live countdown script in the overlay page too.
-                    if ($thourScript) {
-                        $oldScript = '<script[^>]*' + $thourScriptMarker + '[^>]*>[\s\S]*?</script>'
-                        $o = $o -replace $oldScript, ''
-                        $bodyClose = $o.LastIndexOf('</body>')
-                        if ($bodyClose -ge 0) { $o = $o.Insert($bodyClose, $thourScript) }
-                    }
+                    # Self-heal: drop the injected ticker script from earlier builds.
+                    $o = $o -replace '<script[^>]*data-cc-thour-script[^>]*>[\s\S]*?</script>', ''
                     $oChanged = $true
                 }
             }
