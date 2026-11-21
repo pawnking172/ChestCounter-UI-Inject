@@ -1,9 +1,9 @@
-﻿**English** — The Map tab now uses a much brighter, warmer island image that fits the counter's gold/navy style. Every loot kind has its own color **and shape** (chest, rare, buried, vault, ammo, posters, barrels, cannons, shrines) with a dark+white outline so nothing disappears into the map. Hover tooltips show the kind color too.
+﻿**English** — The Map tab now uses the crisp new island image you provided, fitted to the exact same spawn coordinates. All chest / rare / buried / vault points (and the other loot filters) land in the right place, with their own colors and shapes.
 
 ---
 
-**Français** — L'onglet Carte utilise maintenant une image d'île beaucoup plus claire et chaude, assortie au style or/bleu du compteur. Chaque type de butin a sa propre couleur **et sa propre forme** (coffre, rare, enterré, coffre-fort, munitions, affiches, barils, canons, sanctuaires) avec un contour sombre et blanc : plus rien ne se perd dans la carte. L'infobulle affiche aussi la couleur du type.
+**Français** — L'onglet Carte utilise maintenant la nouvelle image d'île nette que vous avez fournie, alignée exactement sur les mêmes coordonnées de butin. Tous les points coffres / rares / enterrés / coffres-forts (et les autres filtres) tombent au bon endroit, avec leurs couleurs et formes propres.
 
 ---
 
-**Español** — La pestaña Mapa usa ahora una imagen de la isla mucho más clara y cálida, a juego con el estilo dorado/azul del contador. Cada tipo de botín tiene su propio color **y forma** (cofre, raro, enterrado, cámara, munición, carteles, barriles, cañones, santuarios) con contorno oscuro y blanco, para que nada se pierda en el mapa. La descripción al pasar el ratón también muestra el color del tipo.
+**Español** — La pestaña Mapa usa ahora la nueva imagen de la isla que nos pasaste, ajustada exactamente a las mismas coordenadas de botín. Todos los puntos de cofres / raros / enterrados / cámaras (y los demás filtros) caen en su sitio, con sus colores y formas propias.
