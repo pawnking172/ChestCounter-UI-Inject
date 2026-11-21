@@ -1,9 +1,9 @@
-﻿**English** — The map image is now noticeably brighter and more colorful (dark areas dropped from ~67% to under 1%), while the loot markers keep their own vivid colors and shapes. Same coordinates, no extra load.
+﻿**English** — Map fixed for real: the image is now very bright and high-contrast (average ~200/255), and the loot markers are larger with thicker dark+white outlines so every color is easy to see. Same exact spawn coordinates.
 
 ---
 
-**Français** — L'image de la carte est nettement plus claire et colorée (les zones sombres passent de ~67 % à moins de 1 %), tandis que les marqueurs gardent leurs couleurs et formes vives. Mêmes coordonnées, aucune charge supplémentaire.
+**Français** — Carte vraiment corrigée : l'image est maintenant très claire et contrastée (moyenne ~200/255) et les marqueurs sont plus grands avec des contours sombres+blancs plus épais : chaque couleur est bien visible. Coordonnées inchangées.
 
 ---
 
-**Español** — La imagen del mapa ahora está bastante más clara y colorida (las zonas oscuras bajan de ~67 % a menos del 1 %), y los marcadores conservan sus colores y formas vivos. Mismas coordenadas, sin carga extra.
+**Español** — Mapa corregido de verdad: la imagen ahora está muy clara y contrastada (promedio ~200/255) y los marcadores son más grandes, con contornos oscuros+blancos más gruesos, así que cada color se ve bien. Coordenadas exactas, sin cambios.
