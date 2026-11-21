@@ -310,11 +310,14 @@ $($rows.ToString())
 </section>
 "@
 
-            # The prizes keep their original place in the program's own "collection"
-            # and "treasures" sections. Drop our extra table so the page stays short.
+            # Put the standalone prize list back at the bottom of the report,
+            # with the prizes the player actually got marked. Rebuild it each pass
+            # so new finds show up, but never stack duplicates.
             $existing = [regex]::Match($h, '<section class="card" ' + $prizeMarker + '[\s\S]*?</section>')
-            if ($existing.Success) {
-                $h = $h.Remove($existing.Index, $existing.Length)
+            if ($existing.Success) { $h = $h.Remove($existing.Index, $existing.Length) }
+            $mainClose = $h.LastIndexOf('</main>')
+            if ($mainClose -ge 0) {
+                $h = $h.Insert($mainClose, $newSection)
                 $changed = $true
             }
             if ($h -ne (Get-Content $reportPath -Raw)) { $changed = $true }
