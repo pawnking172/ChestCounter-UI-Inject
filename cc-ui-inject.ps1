@@ -18,6 +18,7 @@ $replayMarker = 'data-cc-replay'
 $lastMatchMarker = 'data-cc-lastmatch'
 $friendMarker = 'data-cc-friends'
 $heroLastMarker = 'data-cc-hero-last'
+$thourMarker = 'data-cc-thour'
 
 $kindNames = @{
     'outfit' = 'Gold Outfit'
@@ -36,6 +37,7 @@ function Write-Atomic([string]$path, [string]$content) {
 }
 
 function Html([string]$s) { $s -replace '&','&amp;' -replace '<','&lt;' -replace '>','&gt;' }
+function UtcTime([string]$s) { [datetimeoffset]::Parse($s).UtcDateTime }
 
 # prize id (content.json "id", e.g. w3-car) that the replay data misses.
 # Entries are either a plain id (you got it) or { id, by: "squad"|"you", note }.
@@ -130,6 +132,43 @@ while ($true) {
             $friendText = $friendBits -join ' &middot; '
         }
 
+        # ---- Treasure Hour: live / next window and the boosted odds ----
+        $nowUtc = [datetime]::UtcNow
+        $oddsByKind = @{}
+        foreach ($o in @($content.odds)) { $oddsByKind[[string]$o.kind] = [double]$o.oneIn }
+        $hoursSorted = @($content.treasureHours | Sort-Object { UtcTime ([string]$_.start) })
+        $liveHour = $hoursSorted | Where-Object { $nowUtc -ge (UtcTime ([string]$_.start)) -and $nowUtc -lt (UtcTime ([string]$_.end)) } | Select-Object -First 1
+        $nextHour = $hoursSorted | Where-Object { $nowUtc -lt (UtcTime ([string]$_.start)) } | Select-Object -First 1
+        $showHour = if ($liveHour) { $liveHour } else { $nextHour }
+        $boostByKind = @{}
+        $boostBits = New-Object System.Collections.Generic.List[string]
+        foreach ($k in @('car', 'outfit', 'pirate-shop')) {
+            $b = 0.0
+            if ($showHour -and $showHour.boosts.PSObject.Properties.Name -contains $k) {
+                $b = [double]$showHour.boosts.PSObject.Properties[$k].Value
+            }
+            if ($b -gt 0 -and $oddsByKind.ContainsKey($k)) {
+                $boostByKind[$k] = $b
+                $newOdds = [math]::Round($oddsByKind[$k] / $b)
+                $label = if ($k -eq 'car') { 'Vehicle' } elseif ($k -eq 'outfit') { 'Gold outfit' } else { 'Pirate token' }
+                [void]$boostBits.Add("$label &times;$([string]::Format([Globalization.CultureInfo]::InvariantCulture,'{0:0.#}',$b)) &rarr; 1 in $([string]::Format([Globalization.CultureInfo]::InvariantCulture,'{0:N0}',$newOdds))")
+            }
+        }
+        if ($showHour) {
+            if ($liveHour) {
+                $endLocal = (UtcTime ([string]$showHour.end)).ToLocalTime()
+                $thourText = "Treasure Hour LIVE now &middot; until $($endLocal.ToString('HH:mm'))"
+            } else {
+                $startLocal = (UtcTime ([string]$showHour.start)).ToLocalTime()
+                $thourText = "Next Treasure Hour $($startLocal.ToString('ddd d MMM HH:mm'))"
+            }
+            if ($boostBits.Count -gt 0) { $thourText += ' &mdash; ' + ($boostBits -join ' &middot; ') }
+            if (-not $showHour.confirmed) { $thourText += ' &middot; expected, not announced yet' }
+        } else {
+            $thourText = 'Treasure Hour: no announced window left this season'
+        }
+        $thourLine = "<span style=`"display:block`" $thourMarker>$thourText</span>"
+
         # prizeId -> own/team counts + last date (own finds first, then team finds)
         $got = @{}
         function Add-Find([string]$id, [bool]$team, $match) {
@@ -182,7 +221,7 @@ while ($true) {
                     $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
                     $cleanTiles = @"
 <section class="tiles hassquad">
-  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
+  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $thourMarker>$thourText</span><span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
   <div class="tile squadtile"><div class="v num">$squadText</div><div class="l">squad total<br>you + $teamText by your teammates</div></div>
   <div class="tile"><div class="v num">$(& $fmtNum $matchCount)</div><div class="l">matches analyzed</div></div>
   <div class="tile"><div class="v num">$avgText</div><div class="l">chests per match</div></div>
@@ -209,7 +248,9 @@ while ($true) {
                 $stripOpenedSpan = '(?:(?:<br>|\s)*)<span[^>]*' + $openedMarker + '[^>]*>[\s\S]*?</span>'
                 $stripReplaySpan = '(?:(?:<br>|\s)*)<span[^>]*' + $replayMarker + '[^>]*>[\s\S]*?</span>'
                 $stripHeroLast = '(?:(?:<br>|\s)*)<span[^>]*' + $heroLastMarker + '[^>]*>[\s\S]*?</span>'
+                $stripThour = '(?:(?:<br>|\s)*)<span[^>]*' + $thourMarker + '[^>]*>[\s\S]*?</span>'
                 $h = $h -replace $stripHeroLast, ''
+                $h = $h -replace $stripThour, ''
                 $h = $h -replace $stripOpenedSpan, ''
                 $h = $h -replace $stripReplaySpan, ''
                 $numPattern = '(<div class="k">Chests in total</div><div class="v num">)[\d,]+(</div>)'
@@ -220,7 +261,7 @@ while ($true) {
                         $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
                         $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span>"
                         $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
-                        $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $confirmedLine + $replayLine)
+                        $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $thourLine + $confirmedLine + $replayLine)
                     }
                     $changed = $true
                 }
@@ -308,17 +349,23 @@ $($friendRows.ToString())
                     } else {
                         $status = '<span class="muted">&mdash;</span>'
                     }
+                    $boostCell = '<span class="muted">&mdash;</span>'
+                    if ($boostByKind.ContainsKey([string]$p.kind) -and $oddsMap.ContainsKey([string]$p.kind)) {
+                        $b = [double]$boostByKind[[string]$p.kind]
+                        $boostOdds = [math]::Round([double]$oddsMap[[string]$p.kind] / $b)
+                        $boostCell = "<span style=`"color:#b4410f;font-weight:700`">&times;$([string]::Format([Globalization.CultureInfo]::InvariantCulture,'{0:0.#}',$b)) &rarr; 1 in $([string]::Format([Globalization.CultureInfo]::InvariantCulture,'{0:N0}',$boostOdds))</span>"
+                    }
                     $nameCell = if ($thumb) { "<div class=`"tflex`">$thumb<div><b>$(Html $p.name)</b></div></div>" } else { "<b>$(Html $p.name)</b>" }
-                    [void]$rows.AppendLine("<tr><td$labelTitle>$label</td><td>$nameCell</td><td>$kindName</td><td>$oddsTxt</td><td>$status</td></tr>")
+                    [void]$rows.AppendLine("<tr><td$labelTitle>$label</td><td>$nameCell</td><td>$kindName</td><td>$oddsTxt</td><td>$boostCell</td><td>$status</td></tr>")
                 }
             }
 
             $newSection = @"
 <section class="card" $prizeMarker style="padding:16px 18px;margin-top:18px">
 <h2>All treasure prizes &mdash; every week</h2>
-<p class="muted">The whole season, not just this week. Got <b>$owned</b> of <b>$total</b>.</p>
+<p class="muted">The whole season, not just this week. Got <b>$owned</b> of <b>$total</b>. Treasure Hour column = better odds during the next (or live) window.</p>
 <table class="ctable" style="width:100%;table-layout:auto">
-<thead><tr><th style="width:72px">Week</th><th>Prize</th><th style="width:126px">Type</th><th style="width:92px">Each chest</th><th style="width:176px">Status</th></tr></thead>
+<thead><tr><th style="width:72px">Week</th><th>Prize</th><th style="width:126px">Type</th><th style="width:92px">Each chest</th><th style="width:160px">Treasure Hour</th><th style="width:176px">Status</th></tr></thead>
 <tbody>
 $($rows.ToString())
 </tbody></table>
