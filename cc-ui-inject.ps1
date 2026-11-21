@@ -137,6 +137,7 @@ while ($true) {
         # ---- report.html: last line + all-prizes table ----
         if (Test-Path $reportPath) {
             $h = Get-Content $reportPath -Raw
+            $originalReport = $h
             $changed = $false
 
             # Self-heal an older broken pass: prize rows and a run of <br> tags
@@ -320,7 +321,9 @@ $($rows.ToString())
                 $h = $h.Insert($mainClose, $newSection)
                 $changed = $true
             }
-            if ($h -ne (Get-Content $reportPath -Raw)) { $changed = $true }
+            # Write only when the bytes really changed. Rewriting an identical
+            # page every pass makes ChestCounter's WebView reload and flicker.
+            if ($h -cne $originalReport) { $changed = $true } else { $changed = $false }
 
             if ($changed) { Write-Atomic $reportPath $h }
         }
@@ -328,6 +331,7 @@ $($rows.ToString())
         # ---- overlay.html: last match line + exact opened count ----
         if ((Test-Path $overlayPath) -and ($last -or $mine)) {
             $o = Get-Content $overlayPath -Raw
+            $originalOverlay = $o
             $oChanged = $false
             if ($last -and $o -notmatch $marker -and $o -match '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)') {
                 $t = [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm')
@@ -360,6 +364,7 @@ $($rows.ToString())
                     $oChanged = $true
                 }
             }
+            if ($o -cne $originalOverlay) { $oChanged = $true } else { $oChanged = $false }
             if ($oChanged) { Write-Atomic $overlayPath $o }
         }
     } catch {
