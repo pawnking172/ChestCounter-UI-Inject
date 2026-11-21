@@ -1,14 +1,9 @@
-**English** â€” ChestCounter UI addon build 1.5.18. **Check for updates** follows this repository, so this build arrives through the button.
-
-**What's new in 1.5.18**
-- The chest total is now the confirmed **1,068** (Treasure 965 آ· Rare 71 آ· Sprite 32) everywhere: home window, in-game overlay, OBS overlay and report. Previously the home window and the in-game overlay showed the raw replay count (1,277) while the report showed 1,068.
-- The total reads the same confirmed `cc-counts.json` the report uses, so there is only one number to maintain.
-- Treasure Hour stays under **Your chances** with its live countdown and odds difference; the overlays stay totals + squad only.
+﻿**English** — New **Map** tab at the top of the window. It shows the current island with every known chest spawn point (925 chests, 40 rare chests, 69 buried chests, 8 vaults) drawn on the real map image. Filter by type, jump to a named spot, hover a marker for its type and coordinates. The picture and spawn data are built into the app: nothing is downloaded while you use it. Your counts and the other tabs are unchanged.
 
 ---
 
-**Franأ§ais** â€” Version avec l'addon d'interface 1.5.18. Le bouton **Vأ©rifier les mises أ  jour** suit ce dأ©pأ´t.
+**Français** — Nouvel onglet **Carte** en haut de la fenêtre : l'île actuelle avec tous les emplacements de coffres connus (925 coffres, 40 coffres rares, 69 coffres enterrés, 8 coffres-forts) dessinés sur la vraie carte. Filtre par type, choix d'un lieu, et détails au survol. Image et données sont intégrées à l'application : aucun téléchargement à l'utilisation. Vos comptes et les autres onglets ne changent pas.
 
 ---
 
-**Espaأ±ol** â€” Versiأ³n con el addon de interfaz 1.5.18. El botأ³n **Buscar actualizaciones** sigue este repositorio.
+**Español** — Nueva pestaña **Mapa** arriba de la ventana: la isla actual con todos los puntos de cofres conocidos (925 cofres, 40 cofres raros, 69 cofres enterrados, 8 bóvedas) dibujados sobre el mapa real. Filtra por tipo, elige un lugar y pasa el cursor sobre un punto para ver su tipo y coordenadas. La imagen y los datos van incluidos en la app: no descarga nada al usarla. Tus cuentas y las demás pestañas no cambian.
