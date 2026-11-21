@@ -1,9 +1,9 @@
-﻿**English** — The Map tab now uses the crisp new island image you provided, fitted to the exact same spawn coordinates. All chest / rare / buried / vault points (and the other loot filters) land in the right place, with their own colors and shapes.
+﻿**English** — The map image is now noticeably brighter and more colorful (dark areas dropped from ~67% to under 1%), while the loot markers keep their own vivid colors and shapes. Same coordinates, no extra load.
 
 ---
 
-**Français** — L'onglet Carte utilise maintenant la nouvelle image d'île nette que vous avez fournie, alignée exactement sur les mêmes coordonnées de butin. Tous les points coffres / rares / enterrés / coffres-forts (et les autres filtres) tombent au bon endroit, avec leurs couleurs et formes propres.
+**Français** — L'image de la carte est nettement plus claire et colorée (les zones sombres passent de ~67 % à moins de 1 %), tandis que les marqueurs gardent leurs couleurs et formes vives. Mêmes coordonnées, aucune charge supplémentaire.
 
 ---
 
-**Español** — La pestaña Mapa usa ahora la nueva imagen de la isla que nos pasaste, ajustada exactamente a las mismas coordenadas de botín. Todos los puntos de cofres / raros / enterrados / cámaras (y los demás filtros) caen en su sitio, con sus colores y formas propias.
+**Español** — La imagen del mapa ahora está bastante más clara y colorida (las zonas oscuras bajan de ~67 % a menos del 1 %), y los marcadores conservan sus colores y formas vivos. Mismas coordenadas, sin carga extra.
