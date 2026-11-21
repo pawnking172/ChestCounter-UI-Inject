@@ -3,6 +3,12 @@
 #  2) "All treasure prizes" table: every prize of every week (not only the current week)
 #     with its odds and what the player already got (own find, team find, or manual).
 # Also adds the last-match line to overlay.html. Re-injects after each program rewrite.
+# Only one watcher per PC: every program restart used to add another one, and they rewrote
+# the pages at the same time (flicker). The extra copies simply exit here.
+$createdNew = $false
+try { $single = New-Object System.Threading.Mutex($true, 'Local\ChestCounterUiInject', [ref]$createdNew) } catch { $createdNew = $true }
+if (-not $createdNew) { exit }
+
 $dir = "$env:APPDATA\ChestCounter"
 $reportPath = Join-Path $dir 'report.html'
 $overlayPath = Join-Path $dir 'overlay.html'
