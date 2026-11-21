@@ -35,13 +35,26 @@ $kindNames = @{
     'gizmo' = 'Gizmo'
 }
 
+# Windows PowerShell 5.1's Get-Content defaults to the ANSI code page. Reading UTF-8 HTML/JSON
+# with it mangles every accented or non-Latin character (Coffre enterré -> Coffre enterrÃ©, etc.)
+# and the mangled text is then written back permanently. Always read/write explicitly as UTF-8.
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+function Read-Text([string]$path) {
+    $txt = [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8)
+    if ($txt.Length -gt 0 -and $txt[0] -eq [char]0xFEFF) { $txt = $txt.Substring(1) }
+    return $txt
+}
+
 function Write-Atomic([string]$path, [string]$content) {
     $tmp = "$path.cc-tmp"
-    [System.IO.File]::WriteAllText($tmp, $content, [System.Text.Encoding]::UTF8)
+    [System.IO.File]::WriteAllText($tmp, $content, $Utf8NoBom)
     Move-Item $tmp $path -Force
 }
 
-function Html([string]$s) { $s -replace '&','&amp;' -replace '<','&lt;' -replace '>','&gt;' }
+function Html([string]$s) {
+    if ($null -eq $s) { return '' }
+    return ([string]$s).Replace('&','&amp;').Replace('<','&lt;').Replace('>','&gt;').Replace('"','&quot;')
+}
 function UtcTime([string]$s) { [datetimeoffset]::Parse($s).UtcDateTime }
 
 # prize id (content.json "id", e.g. w3-car) that the replay data misses.
@@ -49,7 +62,7 @@ function UtcTime([string]$s) { [datetimeoffset]::Parse($s).UtcDateTime }
 $manual = @{}
 if (Test-Path $manualFile) {
     try {
-        $parsed = Get-Content $manualFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        $parsed = Read-Text $manualFile | ConvertFrom-Json -ErrorAction Stop
         foreach ($e in @($parsed)) {
             if ($null -eq $e) { continue }
             if ($e -is [string]) {
@@ -67,7 +80,7 @@ if (Test-Path $manualFile) {
 $counts = @{ treasure = 0; rare = 0; sprite = 0 }
 if (Test-Path $countsFile) {
     try {
-        $parsedCounts = Get-Content $countsFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        $parsedCounts = Read-Text $countsFile | ConvertFrom-Json -ErrorAction Stop
         foreach ($k in @('treasure', 'rare', 'sprite')) {
             if ($null -ne $parsedCounts.$k) { $counts[$k] = [int]$parsedCounts.$k }
         }
@@ -92,9 +105,9 @@ while ($true) {
         }
         $lastStamp = $stamp
 
-        $d = Get-Content $dataFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-        $cfg = Get-Content $cfgFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-        $content = Get-Content $contentFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        $d = Read-Text $dataFile | ConvertFrom-Json -ErrorAction Stop
+        $cfg = Read-Text $cfgFile | ConvertFrom-Json -ErrorAction Stop
+        $content = Read-Text $contentFile | ConvertFrom-Json -ErrorAction Stop
 
         $profile = $cfg.Profile
         $mine = @($d.Matches | Where-Object { $_.EpicId -eq $profile })
@@ -156,7 +169,7 @@ while ($true) {
         }
         if ($friendRows.Length -eq 0) {
             [void]$friendRows.AppendLine('<tr><td colspan="4" class="muted">No teammates in this replay</td></tr>')
-            $friendText = '<span class="muted">no teammates</span>'
+            $friendText = 'no teammates'
         } else {
             $friendText = $friendBits -join ' &middot; '
         }
@@ -207,7 +220,7 @@ while ($true) {
 
         # ---- report.html: last line + all-prizes table ----
         if (Test-Path $reportPath) {
-            $h = Get-Content $reportPath -Raw
+            $h = Read-Text $reportPath
             $originalReport = $h
             $changed = $false
 
@@ -252,14 +265,10 @@ while ($true) {
                 }
             }
 
-            if ($last -and $h -notmatch $marker) {
-                $t = [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm')
-                $tag = "Last: $($last.ChestsOpened) chests @ $t | Team: $($last.TeamChestsOpened)"
-                if ($h -match '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)') {
-                    $h = $h -replace '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)', "`${1}`${2}<br><span $marker>$tag</span>"
-                    $changed = $true
-                }
-            }
+            # Only one "Last" line: the detailed hero span below (data-cc-hero-last).
+            # An earlier build also added a short data-cc-last line here, so the report
+            # showed the same information twice. Remove any leftover from that build.
+            $h = $h -replace '(?:(?:<br>|\s)*)<span[^>]*data-cc-last[^>]*>Last:[\s\S]*?</span>', ''
 
             # Confirmed total from Fortnite (cc-counts.json) + replay breakdown.
             if ($mine) {
@@ -411,10 +420,17 @@ $($rows.ToString())
             # so new finds show up, but never stack duplicates.
             $existing = [regex]::Match($h, '<section class="card" ' + $prizeMarker + '[\s\S]*?</section>')
             if ($existing.Success) { $h = $h.Remove($existing.Index, $existing.Length) }
-            $mainClose = $h.LastIndexOf('</main>')
-            if ($mainClose -ge 0) {
-                $h = $h.Insert($mainClose, $newSection)
+            # Right under the "Your chances" card (not at the very bottom of the page).
+            $chances = [regex]::Match($h, '<section class="fold[^>]*data-fold="chances"[\s\S]*?</section>')
+            if ($chances.Success) {
+                $h = $h.Insert($chances.Index + $chances.Length, $newSection)
                 $changed = $true
+            } else {
+                $mainClose = $h.LastIndexOf('</main>')
+                if ($mainClose -ge 0) {
+                    $h = $h.Insert($mainClose, $newSection)
+                    $changed = $true
+                }
             }
             # Write only when the bytes really changed. Rewriting an identical
             # page every pass makes ChestCounter's WebView reload and flicker.
@@ -425,7 +441,7 @@ $($rows.ToString())
 
         # ---- overlay.html: last match line + exact opened count ----
         if ((Test-Path $overlayPath) -and ($last -or $mine)) {
-            $o = Get-Content $overlayPath -Raw
+            $o = Read-Text $overlayPath
             $originalOverlay = $o
             $oChanged = $false
             if ($last -and $o -notmatch $marker -and $o -match '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)') {
@@ -454,10 +470,10 @@ $($rows.ToString())
                     # match included. Only the report (rewritten less often) is synced above.
                     $divPattern = '(<div class="total"[^>]*>.*?</div>)'
                     if ($o -match $divPattern) {
-                        # Only you + squad here. Prizes stay in their own report section.
-                        $lastMatchDiv = "<div class=`"r`" $lastMatchMarker>You <b>$lastOpened</b> + $lastBroken broken = <b>$lastTotal</b> total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime</div>"
-                        $friendDiv = "<div class=`"r`" $friendMarker>$friendText</div>"
-                        $o = $o -replace $divPattern, ('${1}' + $lastMatchDiv + $friendDiv)
+                        # Only the compact "Last: ... @ time | Team: ..." line from above.
+                        # Older builds also appended a verbose row here; strip it so the
+                        # overlay does not repeat the same numbers twice.
+                        $o = $o -replace $divPattern, '${1}'
                     }
                     # Self-heal: drop the injected ticker script from earlier builds.
                     $o = $o -replace '<script[^>]*data-cc-thour-script[^>]*>[\s\S]*?</script>', ''
