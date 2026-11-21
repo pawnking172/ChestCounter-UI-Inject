@@ -19,6 +19,7 @@ $lastMatchMarker = 'data-cc-lastmatch'
 $friendMarker = 'data-cc-friends'
 $heroLastMarker = 'data-cc-hero-last'
 $thourMarker = 'data-cc-thour'
+$thourScriptMarker = 'data-cc-thour-script'
 
 $kindNames = @{
     'outfit' = 'Gold Outfit'
@@ -38,6 +39,16 @@ function Write-Atomic([string]$path, [string]$content) {
 
 function Html([string]$s) { $s -replace '&','&amp;' -replace '<','&lt;' -replace '>','&gt;' }
 function UtcTime([string]$s) { [datetimeoffset]::Parse($s).UtcDateTime }
+function DurationText([timespan]$t) {
+    if ($t.TotalSeconds -le 0) { return 'now' }
+    $s = [int][math]::Floor($t.TotalSeconds)
+    $d = [int][math]::Floor($s / 86400)
+    $h = [int][math]::Floor(($s % 86400) / 3600)
+    $m = [int][math]::Floor(($s % 3600) / 60)
+    $sec = $s % 60
+    if ($d -gt 0) { return "$d d $h h $m m" }
+    return "$h h $m m $sec s"
+}
 
 # prize id (content.json "id", e.g. w3-car) that the replay data misses.
 # Entries are either a plain id (you got it) or { id, by: "squad"|"you", note }.
@@ -156,18 +167,45 @@ while ($true) {
         }
         if ($showHour) {
             if ($liveHour) {
-                $endLocal = (UtcTime ([string]$showHour.end)).ToLocalTime()
+                $targetUtc = UtcTime ([string]$showHour.end)
+                $endLocal = $targetUtc.ToLocalTime()
                 $thourText = "Treasure Hour LIVE now &middot; until $($endLocal.ToString('HH:mm'))"
+                $cdPre = 'ends in'
             } else {
-                $startLocal = (UtcTime ([string]$showHour.start)).ToLocalTime()
+                $targetUtc = UtcTime ([string]$showHour.start)
+                $startLocal = $targetUtc.ToLocalTime()
                 $thourText = "Next Treasure Hour $($startLocal.ToString('ddd d MMM HH:mm'))"
+                $cdPre = 'starts in'
             }
+            $targetMs = [DateTimeOffset]::new($targetUtc, [TimeSpan]::Zero).ToUnixTimeMilliseconds()
+            $cdText = DurationText ($targetUtc - $nowUtc)
+            $thourText += " &middot; <b data-cc-countdown data-ts=`"$targetMs`" data-pre=`"$cdPre`">$cdPre $cdText</b>"
             if ($boostBits.Count -gt 0) { $thourText += ' &mdash; ' + ($boostBits -join ' &middot; ') }
             if (-not $showHour.confirmed) { $thourText += ' &middot; expected, not announced yet' }
         } else {
             $thourText = 'Treasure Hour: no announced window left this season'
         }
         $thourLine = "<span style=`"display:block`" $thourMarker>$thourText</span>"
+
+        # The page's own banner already ticks; this one ticks our injected line too.
+        $thourScript = @"
+<script data-cc-thour-script>
+(function(){
+  function fmt(ms){
+    if(ms<=0) return 'now';
+    var s=Math.floor(ms/1000), d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), x=s%60;
+    return (d?d+'d ':'')+h+'h '+m+'m '+(d?'':x+'s');
+  }
+  function tick(){
+    var el=document.querySelector('[data-cc-countdown]');
+    if(!el) return;
+    var left=parseInt(el.getAttribute('data-ts'),10)-Date.now();
+    el.textContent=(el.getAttribute('data-pre')||'')+' '+fmt(left);
+  }
+  tick(); setInterval(tick,1000);
+})();
+</script>
+"@
 
         # prizeId -> own/team counts + last date (own finds first, then team finds)
         $got = @{}
@@ -265,6 +303,14 @@ while ($true) {
                     }
                     $changed = $true
                 }
+            }
+
+            # Keep exactly one live countdown script in the page.
+            $oldThourScript = '<script[^>]*' + $thourScriptMarker + '[^>]*>[\s\S]*?</script>'
+            $h = $h -replace $oldThourScript, ''
+            $bodyClose = $h.LastIndexOf('</body>')
+            if ($bodyClose -ge 0) {
+                $h = $h.Insert($bodyClose, $thourScript)
             }
 
             # Last match: you vs squad, with every teammate's username and count.
