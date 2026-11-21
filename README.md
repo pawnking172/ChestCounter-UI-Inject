@@ -1,29 +1,24 @@
 # ChestCounter UI Addon
 
-إضافة صغيرة على واجهة برنامج **ChestCounter** الأصلي. ما نعدّل ملف `ChestCounter.exe` أبداً؛ نضيف معلومات على ملفات التقرير اللي يولّدها البرنامج.
+نسخة من **ChestCounter** مع تعديلات واجهة على التقرير والـ overlay. الملف التنفيذي نفسه مبني من مصدر البرنامج الرسمي، والتعديلات مدمجة داخله — ما تحتاج تشغّل أي سكربت يدوي.
 
-## تحميل البرنامج الأصلي
+## تحميل النسخة المعدّلة
 
-- أحدث إصدار (1.5.1): https://github.com/LED-N/Fortnite-ChestCounter/releases/latest
-- تحميل مباشر للـ exe: https://github.com/LED-N/Fortnite-ChestCounter/releases/download/v1.5.1/ChestCounter.exe
-- المصدر الرسمي: https://github.com/LED-N/Fortnite-ChestCounter
+- أحدث نسخة (1.5.2): https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
+- تحميل مباشر: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/download/v1.5.2/ChestCounter.exe
 
-## وش تسوي الإضافة
+زر **Check for updates** داخل البرنامج يفحص هذا الريبو مباشرة؛ أي تعديل جديد ننشره كريليز برقم أعلى و asset اسمه `ChestCounter.exe` ويوصله الزر تلقائياً. بياناتك وإعداداتك محفوظة.
 
-1. تضيف سطر `Last: <عدد> chests @ <وقت> | Team: <عدد>` جنب التوتال في `report.html` و `overlay.html`.
-2. تضيف جدول **All treasure prizes — every week** تحت كرت `Your chances` في `report.html`: كل جوائز الأسابيع الخمسة + Pirate Shop (26 جائزة) مع الصور والاحتمالات وحالة كل جائزة.
-3. تحالة الجائزة تجي من ريبلايز اللاعب، أو من ريبلايز الفريق، أو من الملف اليدوي `cc-prize-manual.json`.
+## وش فيه جديد على الأصلي
+
+1. سطر `Last: <عدد> chests @ <وقت> | Team: <عدد>` جنب التوتال في `report.html` و `overlay.html`.
+2. جدول **All treasure prizes — every week** تحت كرت `Your chances` في `report.html`: كل جوائز الأسابيع الخمسة + Pirate Shop (26 جائزة) مع الصور والاحتمالات وحالة كل جائزة.
+3. حالة الجائزة تجي من ريبلايز اللاعب، أو ريبلايز الفريق، أو الملف اليدوي `cc-prize-manual.json`.
 4. المراقب يعيد الحقن تلقائياً بعد كل مرة البرنامج يعيد كتابة `report.html` / `overlay.html`.
-
-## التثبيت
-
-1. حط الملفات `cc-ui-inject.ps1` و `cc-prize-manual.json` في نفس المجلد (مثلاً `C:\Users\<اسمك>\Tools`).
-2. شغّل `install.ps1` مرة واحدة: يسوي اختصار في Startup ويشغّل المراقب.
-3. افتح تقرير ChestCounter من البرنامج؛ الجدول يظهر تحته مباشرة.
 
 ## الجوائز اللي الريبلايز ما يقدر يشوفها
 
-عدّل `cc-prize-manual.json`:
+عدّل `cc-prize-manual.json` في مجلد بيانات البرنامج `%APPDATA%\ChestCounter`:
 
 ```json
 [
@@ -36,16 +31,12 @@
 - `by` إما `you` أو `squad`.
 - سطر نصي عادي (مثل `"w2-jam"`) يعني أنك جبتها بنفسك.
 
-معرفات الجوائز: `w1-outfit`, `w1-pickaxe`, `w1-car`, `w1-jam`, `w1-loading`, `w2-outfit`, `w2-backbling`, `w2-car`, `w2-jam`, `w2-loading`, `w3-outfit`, `w3-backbling`, `w3-car`, `w3-jam`, `w3-loading`, `w4-*`, `w5-*`, `pirate-shop`.
+## المصدر الرسمي
+
+https://github.com/LED-N/Fortnite-ChestCounter/releases/latest
 
 ## ملاحظات
 
 - البيانات تُقرأ من `%APPDATA%\ChestCounter\data.json` و `content.json` و `config.json`.
-- الإضافة تشتغل مع كل تحديث للبرنامج طالما أسماء الملفات/الحقول ما تغيّرت.
-- أي تعديل جديد على واجهة ChestCounter يرفع هنا بنفس الريبو.
-
-## تحديثات صديقك من زر Check for updates
-
-زر التحديث في البرنامج يقرأ رابط GitHub الرسمي المكتوب داخله (`LED-N/Fortnite-ChestCounter`). عشان يقرأ ريبوك بدل منه، شغّل مرة واحدة الملف `enable-updates.reg` على جهاز صديقك (يضيف متغير `CHESTCOUNTER_UPDATE_API`)، ثم أعد فتح البرنامج. بعدها زر **Check for updates** يفحص `pawnking172/ChestCounter-UI-Inject`.
-
-كل تعديل جديد ننشره كريليز برقم أعلى من الحالي مع ملف باسم `ChestCounter.exe` بالـ assets؛ الزر يجيه مباشرة. لين ننشر أول ريليز، الزر بيقول "على أحدث نسخة" بشكل طبيعي.
+- الملفات `cc-ui-inject.ps1` و `cc-prize-manual.json` تُستخرج تلقائياً في مجلد البيانات عند أول تشغيل.
+- `enable-updates.reg` موجود للضرورة القديمة، لكن النسخة المبنية ما تحتاجه لأن رابط التحديث مدمج فيها.
