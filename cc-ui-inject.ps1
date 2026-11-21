@@ -13,6 +13,10 @@ $manualFile = Join-Path $PSScriptRoot 'cc-prize-manual.json'
 $marker = 'data-cc-last'
 $prizeMarker = 'data-cc-prizes'
 
+# Only one watcher per machine (the program starts one on every launch).
+$dup = Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -match 'cc-ui-inject\.ps1' }
+if ($dup) { exit }
+
 $kindNames = @{
     'outfit' = 'Gold Outfit'
     'pirate-shop' = 'Pirate Shop Access'
