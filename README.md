@@ -13,10 +13,10 @@
 
 1. سطر `Last: <عدد> chests @ <وقت> | Team: <عدد>` جنب التوتال في `report.html` و `overlay.html`.
 2. الجوايز تبقى في أقسام البرنامج الأصلية (`Your collection` / `Treasures found`) وما ينضاف لها جدول إضافي عشان الصفحة ما تطول.
-4. التوتال المعروض هو العدد المؤكد من Fortnite في `cc-counts.json` ( treasure / rare / sprite )، مع سطر منفصل لعدد الريبلايز.
-5. قسم `Last match — you & squad`: آخر مباراة، كم فتحت أنت، كم فتح الفريق، واسم كل صديق وعدّه بالضبط.
-6. الـ overlay يعرض بس: التوتال + «You … · Team …» + أسماء الأصدقاء وعددهم. ما فيه جوائز ولا تكرار صفوف.
-7. المراقب يعيد الحقن تلقائياً بعد كل مرة البرنامج يعيد كتابة `report.html` / `overlay.html`.
+3. التوتال المعروض هو العدد المؤكد من Fortnite في `cc-counts.json` ( treasure / rare / sprite )، مع سطر منفصل لعدد الريبلايز.
+4. قسم `Last match — you & squad`: آخر مباراة، كم فتحت أنت، كم فتح الفريق، واسم كل صديق وعدّه بالضبط.
+5. الـ overlay يعرض بس: التوتال + «You … · Team …» + أسماء الأصدقاء وعددهم. ما فيه جوائز ولا تكرار صفوف.
+6. المراقب يعيد الحقن تلقائياً بعد كل مرة البرنامج يعيد كتابة `report.html` / `overlay.html`.
 
 ## العدد المؤكد من Fortnite
 
@@ -50,5 +50,5 @@ https://github.com/LED-N/Fortnite-ChestCounter/releases/latest
 ## ملاحظات
 
 - البيانات تُقرأ من `%APPDATA%\ChestCounter\data.json` و `content.json` و `config.json`.
-- الملفات `cc-ui-inject.ps1` و `cc-prize-manual.json` تُستخرج تلقائياً في مجلد البيانات عند أول تشغيل.
+- الملفات `cc-ui-inject.ps1` و `cc-prize-manual.json` و `cc-counts.json` تُستخرج تلقائياً في مجلد البيانات عند أول تشغيل.
 - `enable-updates.reg` موجود للضرورة القديمة، لكن النسخة المبنية ما تحتاجه لأن رابط التحديث مدمج فيها.
