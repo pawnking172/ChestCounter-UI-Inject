@@ -149,7 +149,7 @@ while ($true) {
         $liveTotalText = & $fmtNum $liveTotal
         $liveSquadText = & $fmtNum ($liveTotal + $teamLive)
 
-        # Last match: exact opened/broken for you, and every teammate by username.
+        # Last match: only the total for you and every teammate by username.
         $lastOpened = 0; $lastBroken = 0
         if ($last) {
             foreach ($c in @($last.Chests)) {
@@ -157,25 +157,23 @@ while ($true) {
             }
         }
         $lastTotal = $lastOpened + $lastBroken
-        $lastTotalText = "<b>$lastTotal</b>"
         $lastTime = if ($last) { [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm') } else { '--:--' }
         $friendRows = New-Object System.Text.StringBuilder
         $friendBits = New-Object System.Collections.Generic.List[string]
         foreach ($tm in @($last.TeamChests)) {
             $tmName = Html ([string]$tm.Name)
-            $tmOpened = [math]::Max(0, [int]$tm.Chests - [int]$tm.Destroyed)
             # A replay only records players near the recorder. No recorded action means "unknown", never zero.
             $tmSeen = [bool]$tm.Observed -or [int]$tm.Chests -gt 0
             if ($tmSeen) {
-                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td>$tmOpened</td><td>$($tm.Destroyed)</td><td><b>$($tm.Chests)</b></td></tr>")
-                [void]$friendBits.Add("$tmName $tmOpened ($($tm.Chests) total)")
+                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td><b>$($tm.Chests)</b></td></tr>")
+                [void]$friendBits.Add("$tmName $($tm.Chests)")
             } else {
-                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td colspan=`"3`" class=`"muted`" title=`"That teammate was too far away: the replay cannot see their chests.`">not in range</td></tr>")
+                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td class=`"muted`" title=`"That teammate was too far away: the replay cannot see their chests.`">not in range</td></tr>")
                 [void]$friendBits.Add("$tmName not in range")
             }
         }
         if ($friendRows.Length -eq 0) {
-            [void]$friendRows.AppendLine('<tr><td colspan="4" class="muted">No teammates in this replay</td></tr>')
+            [void]$friendRows.AppendLine('<tr><td colspan="2" class="muted">No teammates in this replay</td></tr>')
             $friendText = 'no teammates'
         } else {
             $friendText = $friendBits -join ' &middot; '
@@ -259,7 +257,7 @@ while ($true) {
                     $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
                     $cleanTiles = @"
 <section class="tiles hassquad">
-  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$heroNum</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
+  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$heroNum</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastTotal</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
   <div class="tile squadtile"><div class="v num">$squadText</div><div class="l">squad total<br>you + $teamText by your teammates</div></div>
   <div class="tile"><div class="v num">$(& $fmtNum $matchCount)</div><div class="l">matches analyzed</div></div>
   <div class="tile"><div class="v num">$avgText</div><div class="l">chests per match</div></div>
@@ -304,7 +302,7 @@ while ($true) {
                     }
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
-                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
+                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastTotal</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
                         $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b> (grows with new chests)</span>"
                         $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
                         $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $confirmedLine + $replayLine)
@@ -322,11 +320,11 @@ while ($true) {
                 $lastSection = @"
 <section class="card" $lastMatchMarker style="padding:16px 18px;margin-top:18px">
 <h2>Last match &mdash; you &amp; squad</h2>
-<p class="muted">$lastTime &middot; You opened <b>$lastOpened</b> + $lastBroken broken = <b>$lastTotal</b> total &middot; Team opened <b>$($last.TeamChestsOpened)</b></p>
+<p class="muted">$lastTime &middot; You <b>$lastTotal</b> total &middot; Team <b>$($last.TeamChestsOpened)</b></p>
 <table class="ctable" style="width:100%;table-layout:auto">
-<thead><tr><th>Player</th><th style="width:100px">Opened</th><th style="width:100px">Broken</th><th style="width:100px">Total</th></tr></thead>
+<thead><tr><th>Player</th><th style="width:100px">Total</th></tr></thead>
 <tbody>
-<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td>$lastOpened</td><td>$lastBroken</td><td><b>$lastTotal</b></td></tr>
+<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td><b>$lastTotal</b></td></tr>
 $($friendRows.ToString())
 </tbody></table>
 </section>
