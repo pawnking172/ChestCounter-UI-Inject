@@ -43,3 +43,9 @@
 - البيانات تُقرأ من `%APPDATA%\ChestCounter\data.json` و `content.json` و `config.json`.
 - الإضافة تشتغل مع كل تحديث للبرنامج طالما أسماء الملفات/الحقول ما تغيّرت.
 - أي تعديل جديد على واجهة ChestCounter يرفع هنا بنفس الريبو.
+
+## تحديثات صديقك من زر Check for updates
+
+زر التحديث في البرنامج يقرأ رابط GitHub الرسمي المكتوب داخله (`LED-N/Fortnite-ChestCounter`). عشان يقرأ ريبوك بدل منه، شغّل مرة واحدة الملف `enable-updates.reg` على جهاز صديقك (يضيف متغير `CHESTCOUNTER_UPDATE_API`)، ثم أعد فتح البرنامج. بعدها زر **Check for updates** يفحص `pawnking172/ChestCounter-UI-Inject`.
+
+كل تعديل جديد ننشره كريليز برقم أعلى من الحالي مع ملف باسم `ChestCounter.exe` بالـ assets؛ الزر يجيه مباشرة. لين ننشر أول ريليز، الزر بيقول "على أحدث نسخة" بشكل طبيعي.
