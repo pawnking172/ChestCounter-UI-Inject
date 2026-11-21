@@ -136,6 +136,47 @@ while ($true) {
             $h = Get-Content $reportPath -Raw
             $changed = $false
 
+            # Self-heal an older broken pass: prize rows and a run of <br> tags
+            # could end up inside the hero tile and make the page grow forever.
+            $tilesMatch = [regex]::Match($h, '<section class="tiles[\s\S]*?</section>')
+            if ($tilesMatch.Success) {
+                $brCount = [regex]::Matches($tilesMatch.Value, '<br>').Count
+                if ($brCount -gt 8 -or $tilesMatch.Value -match '<tr>|<table') {
+                    $fmtNum = { param($x) [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $x) }
+                    $pencil = [regex]::Match($tilesMatch.Value, '<button[^>]*class="editbtn"[\s\S]*?</button>').Value
+                    $sessionTxt = [regex]::Match($tilesMatch.Value, '([\d,]+)\s+since the tool started').Groups[1].Value
+                    if (-not $sessionTxt) { $sessionTxt = '0' }
+                    $teamChests = 0; $ownFinds = 0; $teamFinds = 0; $bestMatch = 0
+                    foreach ($mm in $mine) {
+                        $teamChests += [int]$mm.TeamChestsOpened
+                        $ownFinds += @($mm.TreasureFinds).Count
+                        $teamFinds += @($mm.TeamTreasureFinds).Count
+                        $n = @($mm.Chests | Where-Object { -not $_.Destroyed }).Count
+                        if ($n -gt $bestMatch) { $bestMatch = $n }
+                    }
+                    $matchCount = @($mine).Count
+                    $squadText = & $fmtNum ($confirmedTotal + $teamChests)
+                    $teamText = & $fmtNum $teamChests
+                    $bestText = & $fmtNum $bestMatch
+                    $findText = & $fmtNum $ownFinds
+                    $teamFindText = & $fmtNum $teamFinds
+                    $avgText = if ($matchCount -gt 0) { [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:0.0}', ($confirmedTotal / $matchCount)) } else { '0.0' }
+                    $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
+                    $cleanTiles = @"
+<section class="tiles hassquad">
+  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$confirmedText</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
+  <div class="tile squadtile"><div class="v num">$squadText</div><div class="l">squad total<br>you + $teamText by your teammates</div></div>
+  <div class="tile"><div class="v num">$(& $fmtNum $matchCount)</div><div class="l">matches analyzed</div></div>
+  <div class="tile"><div class="v num">$avgText</div><div class="l">chests per match</div></div>
+  <div class="tile"><div class="v num">$bestText</div><div class="l">best match</div></div>
+  <div class="tile"><div class="v num">$findText</div><div class="l">treasures found$teamFindLine</div></div>
+</section>
+"@
+                    $h = $h.Remove($tilesMatch.Index, $tilesMatch.Length).Insert($tilesMatch.Index, $cleanTiles)
+                    $changed = $true
+                }
+            }
+
             if ($last -and $h -notmatch $marker) {
                 $t = [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm')
                 $tag = "Last: $($last.ChestsOpened) chests @ $t | Team: $($last.TeamChestsOpened)"
@@ -147,8 +188,8 @@ while ($true) {
 
             # Confirmed total from Fortnite (cc-counts.json) + replay breakdown.
             if ($mine) {
-                $stripOpenedSpan = '<span ' + $openedMarker + '[^>]*>[\s\S]*?</span>'
-                $stripReplaySpan = '<span ' + $replayMarker + '[^>]*>[\s\S]*?</span>'
+                $stripOpenedSpan = '(?:(?:<br>|\s)*)<span[^>]*' + $openedMarker + '[^>]*>[\s\S]*?</span>'
+                $stripReplaySpan = '(?:(?:<br>|\s)*)<span[^>]*' + $replayMarker + '[^>]*>[\s\S]*?</span>'
                 $h = $h -replace $stripOpenedSpan, ''
                 $h = $h -replace $stripReplaySpan, ''
                 $numPattern = '(<div class="k">Chests in total</div><div class="v num">)[\d,]+(</div>)'
@@ -156,8 +197,8 @@ while ($true) {
                     $h = $h -replace $numPattern, ('${1}' + $confirmedText + '${2}')
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
-                        $confirmedLine = "<br><span $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span>"
-                        $replayLine = "<br><span $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
+                        $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span>"
+                        $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
                         $h = $h -replace $lblPattern, ('${1}${2}' + $confirmedLine + $replayLine)
                     }
                     $changed = $true
