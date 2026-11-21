@@ -10,9 +10,13 @@ $dataFile = Join-Path $dir 'data.json'
 $cfgFile = Join-Path $dir 'config.json'
 $contentFile = Join-Path $dir 'content.json'
 $manualFile = Join-Path $PSScriptRoot 'cc-prize-manual.json'
+$countsFile = Join-Path $PSScriptRoot 'cc-counts.json'
 $marker = 'data-cc-last'
 $prizeMarker = 'data-cc-prizes'
 $openedMarker = 'data-cc-opened'
+$replayMarker = 'data-cc-replay'
+$lastMatchMarker = 'data-cc-lastmatch'
+$friendMarker = 'data-cc-friends'
 
 $kindNames = @{
     'outfit' = 'Gold Outfit'
@@ -51,6 +55,19 @@ if (Test-Path $manualFile) {
     } catch { $manual = @{} }
 }
 
+# Chest counts the player confirmed from Fortnite (treasure / rare / sprite).
+$counts = @{ treasure = 0; rare = 0; sprite = 0 }
+if (Test-Path $countsFile) {
+    try {
+        $parsedCounts = Get-Content $countsFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        foreach ($k in @('treasure', 'rare', 'sprite')) {
+            if ($null -ne $parsedCounts.$k) { $counts[$k] = [int]$parsedCounts.$k }
+        }
+    } catch { }
+}
+$confirmedTotal = [int]$counts.treasure + [int]$counts.rare + [int]$counts.sprite
+$confirmedText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $confirmedTotal)
+
 while ($true) {
     try {
         $d = Get-Content $dataFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
@@ -72,6 +89,29 @@ while ($true) {
         }
         $openedText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $openedCount)
         $brokenText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $brokenCount)
+
+        # Last match: exact opened/broken for you, and every teammate by username.
+        $lastOpened = 0; $lastBroken = 0
+        if ($last) {
+            foreach ($c in @($last.Chests)) {
+                if ($c.Destroyed) { $lastBroken++ } else { $lastOpened++ }
+            }
+        }
+        $lastTime = if ($last) { [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm') } else { '--:--' }
+        $friendRows = New-Object System.Text.StringBuilder
+        $friendBits = New-Object System.Collections.Generic.List[string]
+        foreach ($tm in @($last.TeamChests)) {
+            $tmName = Html ([string]$tm.Name)
+            $tmOpened = [math]::Max(0, [int]$tm.Chests - [int]$tm.Destroyed)
+            [void]$friendRows.AppendLine("<tr><td>$tmName</td><td>$tmOpened</td><td>$($tm.Destroyed)</td></tr>")
+            [void]$friendBits.Add("$tmName $tmOpened")
+        }
+        if ($friendRows.Length -eq 0) {
+            [void]$friendRows.AppendLine('<tr><td colspan="3" class="muted">No teammates in this replay</td></tr>')
+            $friendText = '<span class="muted">no teammates</span>'
+        } else {
+            $friendText = $friendBits -join ' &middot; '
+        }
 
         # prizeId -> own/team counts + last date (own finds first, then team finds)
         $got = @{}
@@ -105,16 +145,45 @@ while ($true) {
                 }
             }
 
-            # Exact opened count (the program's hero number includes broken chests).
-            if ($mine -and $h -notmatch $openedMarker) {
+            # Confirmed total from Fortnite (cc-counts.json) + replay breakdown.
+            if ($mine) {
+                $h = $h -replace '<span ' + $openedMarker + '[^>]*>[\s\S]*?</span>', ''
+                $h = $h -replace '<span ' + $replayMarker + '[^>]*>[\s\S]*?</span>', ''
                 $numPattern = '(<div class="k">Chests in total</div><div class="v num">)[\d,]+(</div>)'
                 if ($h -match $numPattern) {
-                    $h = $h -replace $numPattern, ('${1}' + $openedText + '${2}')
+                    $h = $h -replace $numPattern, ('${1}' + $confirmedText + '${2}')
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
-                        $h = $h -replace $lblPattern, "`${1}`${2}<br><span $openedMarker>Opened exactly: $openedText &middot; $brokenText broken/destroyed</span>"
+                        $confirmedLine = "<br><span $openedMarker>Confirmed: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span>"
+                        $replayLine = "<br><span $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
+                        $h = $h -replace $lblPattern, ('${1}${2}' + $confirmedLine + $replayLine)
                     }
                     $changed = $true
+                }
+            }
+
+            # Last match: you vs squad, with every teammate's username and count.
+            if ($last) {
+                $lastSection = @"
+<section class="card" $lastMatchMarker style="padding:16px 18px;margin-top:18px">
+<h2>Last match &mdash; you &amp; squad</h2>
+<p class="muted">$lastTime &middot; You opened <b>$lastOpened</b> &middot; Team opened <b>$($last.TeamChestsOpened)</b></p>
+<table class="ctable" style="width:100%;table-layout:auto">
+<thead><tr><th>Player</th><th style="width:110px">Opened</th><th style="width:110px">Broken</th></tr></thead>
+<tbody>
+<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td>$lastOpened</td><td>$lastBroken</td></tr>
+$($friendRows.ToString())
+</tbody></table>
+</section>
+"@
+                $oldLast = [regex]::Match($h, '<section class="card" ' + $lastMatchMarker + '[\s\S]*?</section>')
+                if ($oldLast.Success) { $h = $h.Remove($oldLast.Index, $oldLast.Length) }
+                $lastAnchor = $h.IndexOf('<section><h2 class="pirate">Chests per day')
+                if ($lastAnchor -lt 0) { $lastAnchor = $h.IndexOf('<section class="card" ' + $prizeMarker) }
+                if ($lastAnchor -ge 0) {
+                    $h = $h.Insert($lastAnchor, $lastSection)
+                } elseif ($h -match '</main>') {
+                    $h = $h -replace '</main>', "$lastSection</main>"
                 }
             }
 
@@ -219,13 +288,19 @@ $($rows.ToString())
                 $o = $o -replace '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)', "`${1}<span class=`"sep`" $marker>$overlayTag</span>`${2}"
                 $oChanged = $true
             }
-            if ($mine -and $o -notmatch $openedMarker) {
+            if ($mine) {
+                $o = $o -replace '<div class="r" ' + $openedMarker + '[^>]*>[\s\S]*?</div>', ''
+                $o = $o -replace '<div class="r" ' + $replayMarker + '[^>]*>[\s\S]*?</div>', ''
+                $o = $o -replace '<div class="r" ' + $friendMarker + '[^>]*>[\s\S]*?</div>', ''
                 $numPattern = '(<div class="total"[^>]*>.*?</svg>)[\d,]+(</div>)'
                 if ($o -match $numPattern) {
-                    $o = $o -replace $numPattern, ('${1}' + $openedText + '${2}')
+                    $o = $o -replace $numPattern, ('${1}' + $confirmedText + '${2}')
                     $divPattern = '(<div class="total"[^>]*>.*?</div>)'
                     if ($o -match $divPattern) {
-                        $o = $o -replace $divPattern, "`${1}<div class=`"r`" $openedMarker>Opened exact $openedText &middot; $brokenText broken</div>"
+                        $confirmedDiv = "<div class=`"r`" $openedMarker>Confirmed $confirmedText &middot; T$($counts.treasure) R$($counts.rare) S$($counts.sprite)</div>"
+                        $replayDiv = "<div class=`"r`" $replayMarker>Replay $openedText opened &middot; $brokenText broken</div>"
+                        $friendDiv = "<div class=`"r`" $friendMarker>$friendText</div>"
+                        $o = $o -replace $divPattern, ('${1}' + $confirmedDiv + $replayDiv + $friendDiv)
                     }
                     $oChanged = $true
                 }
