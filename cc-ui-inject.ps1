@@ -69,8 +69,22 @@ if (Test-Path $countsFile) {
 $confirmedTotal = [int]$counts.treasure + [int]$counts.rare + [int]$counts.sprite
 $confirmedText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $confirmedTotal)
 
+# Stay idle while nothing on disk changes: parsing data.json every second
+# is wasted CPU/RAM on a weak machine. Only wake on a real file change.
+$lastStamp = ''
 while ($true) {
     try {
+        $stamp = @($dataFile, $cfgFile, $contentFile, $reportPath, $overlayPath) | ForEach-Object {
+            $f = Get-Item $_ -ErrorAction SilentlyContinue
+            if ($f) { "$($f.LastWriteTimeUtc.Ticks)-$($f.Length)" } else { 'none' }
+        }
+        $stamp = $stamp -join '|'
+        if ($stamp -eq $lastStamp) {
+            Start-Sleep -Milliseconds 1500
+            continue
+        }
+        $lastStamp = $stamp
+
         $d = Get-Content $dataFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
         $cfg = Get-Content $cfgFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
         $content = Get-Content $contentFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
