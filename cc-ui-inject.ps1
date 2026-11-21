@@ -112,6 +112,23 @@ while ($true) {
         $openedText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $openedCount)
         $brokenText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $brokenCount)
 
+        # The program rewrites overlay.html on every live update but only rewrites report.html
+        # after a full replay pass. Keep both pages in sync with data.json so the total really
+        # moves when a chest is counted. Changes only when data changes, never on a timer: no flicker.
+        $countedLive = 0; $teamLive = 0
+        foreach ($mm in $mine) {
+            $countedLive += [int]$mm.ChestsOpened
+            $teamLive += [int]$mm.TeamChestsOpened
+        }
+        $manualAdj = 0
+        if ($d.ManualChests -and $d.ManualChests.PSObject.Properties.Name -contains $profile) {
+            $manualAdj = [int]$d.ManualChests.$profile
+        }
+        $liveTotal = [math]::Max(0, $countedLive + $manualAdj)
+        $fmtNum = { param($x) [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $x) }
+        $liveTotalText = & $fmtNum $liveTotal
+        $liveSquadText = & $fmtNum ($liveTotal + $teamLive)
+
         # Last match: exact opened/broken for you, and every teammate by username.
         $lastOpened = 0; $lastBroken = 0
         if ($last) {
@@ -193,7 +210,6 @@ while ($true) {
             if ($tilesMatch.Success) {
                 $brCount = [regex]::Matches($tilesMatch.Value, '<br>').Count
                 if ($brCount -gt 8 -or $tilesMatch.Value -match '<tr>|<table') {
-                    $fmtNum = { param($x) [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $x) }
                     $pencil = [regex]::Match($tilesMatch.Value, '<button[^>]*class="editbtn"[\s\S]*?</button>').Value
                     $sessionTxt = [regex]::Match($tilesMatch.Value, '([\d,]+)\s+since the tool started').Groups[1].Value
                     if (-not $sessionTxt) { $sessionTxt = '0' }
@@ -206,16 +222,13 @@ while ($true) {
                         if ($n -gt $bestMatch) { $bestMatch = $n }
                     }
                     $matchCount = @($mine).Count
-                    # Keep the numbers ChestCounter generated: they grow when a new chest is counted.
-                    $heroNum = [regex]::Match($tilesMatch.Value, '<div class="k">Chests in total</div><div class="v num">([\d,]+)</div>').Groups[1].Value
-                    if (-not $heroNum) { $heroNum = $confirmedText }
-                    $squadText = [regex]::Match($tilesMatch.Value, '<div class="v num">([\d,]+)</div><div class="l">squad total').Groups[1].Value
-                    if (-not $squadText) { $squadText = & $fmtNum ($confirmedTotal + $teamChests) }
+                    $heroNum = $liveTotalText
+                    $squadText = $liveSquadText
                     $teamText = & $fmtNum $teamChests
                     $bestText = & $fmtNum $bestMatch
                     $findText = & $fmtNum $ownFinds
                     $teamFindText = & $fmtNum $teamFinds
-                    $avgText = if ($matchCount -gt 0) { [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:0.0}', ($confirmedTotal / $matchCount)) } else { '0.0' }
+                    $avgText = if ($matchCount -gt 0) { [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:0.0}', ($liveTotal / $matchCount)) } else { '0.0' }
                     $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
                     $cleanTiles = @"
 <section class="tiles hassquad">
@@ -253,7 +266,19 @@ while ($true) {
                 $h = $h -replace $stripReplaySpan, ''
                 $numPattern = '(<div class="k">Chests in total</div><div class="v num">)[\d,]+(</div>)'
                 if ($h -match $numPattern) {
-                    # Never overwrite the number: the program recounts it on every replay.
+                    # report.html can lag behind a live update. Refresh it from data.json only
+                    # when the number differs, so the page is written once per real change.
+                    if ($Matches[1] + $liveTotalText + $Matches[2] -ne [regex]::Match($h, $numPattern).Value) {
+                        $h = $h -replace $numPattern, ('${1}' + $liveTotalText + '${2}')
+                        $changed = $true
+                    }
+                    $squadPattern = '(<div class="v num">)[\d,]+(</div><div class="l">squad total)'
+                    if ($h -match $squadPattern) {
+                        if ($Matches[1] + $liveSquadText + $Matches[2] -ne [regex]::Match($h, $squadPattern).Value) {
+                            $h = $h -replace $squadPattern, ('${1}' + $liveSquadText + '${2}')
+                            $changed = $true
+                        }
+                    }
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
                         $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastOpened</b> + $lastBroken broken = $lastTotalText total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
@@ -418,7 +443,9 @@ $($rows.ToString())
                 $o = $o -replace $stripThourOverlay, ''
                 $numPattern = '(<div class="total"[^>]*>.*?</svg>)[\d,]+(</div>)'
                 if ($o -match $numPattern) {
-                    # Leave the total alone: the program updates it when a chest is counted.
+                    if ($Matches[1] + $liveTotalText + $Matches[2] -ne [regex]::Match($o, $numPattern).Value) {
+                        $o = $o -replace $numPattern, ('${1}' + $liveTotalText + '${2}')
+                    }
                     $divPattern = '(<div class="total"[^>]*>.*?</div>)'
                     if ($o -match $divPattern) {
                         # Only you + squad here. Prizes stay in their own report section.
