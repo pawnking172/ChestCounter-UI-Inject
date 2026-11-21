@@ -164,8 +164,15 @@ while ($true) {
         foreach ($tm in @($last.TeamChests)) {
             $tmName = Html ([string]$tm.Name)
             $tmOpened = [math]::Max(0, [int]$tm.Chests - [int]$tm.Destroyed)
-            [void]$friendRows.AppendLine("<tr><td>$tmName</td><td>$tmOpened</td><td>$($tm.Destroyed)</td><td><b>$($tm.Chests)</b></td></tr>")
-            [void]$friendBits.Add("$tmName $tmOpened ($($tm.Chests) total)")
+            # A replay only records players near the recorder. No recorded action means "unknown", never zero.
+            $tmSeen = [bool]$tm.Observed -or [int]$tm.Chests -gt 0
+            if ($tmSeen) {
+                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td>$tmOpened</td><td>$($tm.Destroyed)</td><td><b>$($tm.Chests)</b></td></tr>")
+                [void]$friendBits.Add("$tmName $tmOpened ($($tm.Chests) total)")
+            } else {
+                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td colspan=`"3`" class=`"muted`" title=`"That teammate was too far away: the replay cannot see their chests.`">not in range</td></tr>")
+                [void]$friendBits.Add("$tmName not in range")
+            }
         }
         if ($friendRows.Length -eq 0) {
             [void]$friendRows.AppendLine('<tr><td colspan="4" class="muted">No teammates in this replay</td></tr>')
