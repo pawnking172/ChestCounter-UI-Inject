@@ -12,10 +12,7 @@ $contentFile = Join-Path $dir 'content.json'
 $manualFile = Join-Path $PSScriptRoot 'cc-prize-manual.json'
 $marker = 'data-cc-last'
 $prizeMarker = 'data-cc-prizes'
-
-# Only one watcher per machine (the program starts one on every launch).
-$dup = Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -match 'cc-ui-inject\.ps1' }
-if ($dup) { exit }
+$openedMarker = 'data-cc-opened'
 
 $kindNames = @{
     'outfit' = 'Gold Outfit'
@@ -65,6 +62,17 @@ while ($true) {
         $last = $mine | Sort-Object MatchStartUtc | Select-Object -Last 1
         if (-not $last) { $last = $d.Matches | Sort-Object MatchStartUtc | Select-Object -Last 1 }
 
+        # The program counts opened AND broken (shot/destroyed) chests together.
+        # Show the exact opened count separately, without guessing.
+        $openedCount = 0; $brokenCount = 0
+        foreach ($mm in $mine) {
+            foreach ($c in @($mm.Chests)) {
+                if ($c.Destroyed) { $brokenCount++ } else { $openedCount++ }
+            }
+        }
+        $openedText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $openedCount)
+        $brokenText = [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0:N0}', $brokenCount)
+
         # prizeId -> own/team counts + last date (own finds first, then team finds)
         $got = @{}
         function Add-Find([string]$id, [bool]$team, $match) {
@@ -93,6 +101,19 @@ while ($true) {
                 $tag = "Last: $($last.ChestsOpened) chests @ $t | Team: $($last.TeamChestsOpened)"
                 if ($h -match '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)') {
                     $h = $h -replace '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)', "`${1}`${2}<br><span $marker>$tag</span>"
+                    $changed = $true
+                }
+            }
+
+            # Exact opened count (the program's hero number includes broken chests).
+            if ($mine -and $h -notmatch $openedMarker) {
+                $numPattern = '(<div class="k">Chests in total</div><div class="v num">)[\d,]+(</div>)'
+                if ($h -match $numPattern) {
+                    $h = $h -replace $numPattern, ('${1}' + $openedText + '${2}')
+                    $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
+                    if ($h -match $lblPattern) {
+                        $h = $h -replace $lblPattern, "`${1}`${2}<br><span $openedMarker>Opened exactly: $openedText &middot; $brokenText broken/destroyed</span>"
+                    }
                     $changed = $true
                 }
             }
@@ -188,15 +209,28 @@ $($rows.ToString())
             if ($changed) { Write-Atomic $reportPath $h }
         }
 
-        # ---- overlay.html: last match line ----
-        if ($last -and (Test-Path $overlayPath)) {
+        # ---- overlay.html: last match line + exact opened count ----
+        if ((Test-Path $overlayPath) -and ($last -or $mine)) {
             $o = Get-Content $overlayPath -Raw
-            if ($o -notmatch $marker -and $o -match '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)') {
+            $oChanged = $false
+            if ($last -and $o -notmatch $marker -and $o -match '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)') {
                 $t = [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm')
                 $overlayTag = "@ $t | Team: $($last.TeamChestsOpened)"
-                $new = $o -replace '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)', "`${1}<span class=`"sep`" $marker>$overlayTag</span>`${2}"
-                Write-Atomic $overlayPath $new
+                $o = $o -replace '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)', "`${1}<span class=`"sep`" $marker>$overlayTag</span>`${2}"
+                $oChanged = $true
             }
+            if ($mine -and $o -notmatch $openedMarker) {
+                $numPattern = '(<div class="total"[^>]*>.*?</svg>)[\d,]+(</div>)'
+                if ($o -match $numPattern) {
+                    $o = $o -replace $numPattern, ('${1}' + $openedText + '${2}')
+                    $divPattern = '(<div class="total"[^>]*>.*?</div>)'
+                    if ($o -match $divPattern) {
+                        $o = $o -replace $divPattern, "`${1}<div class=`"r`" $openedMarker>Opened exact $openedText &middot; $brokenText broken</div>"
+                    }
+                    $oChanged = $true
+                }
+            }
+            if ($oChanged) { Write-Atomic $overlayPath $o }
         }
     } catch {
         # ignore transient read/write races with ChestCounter
