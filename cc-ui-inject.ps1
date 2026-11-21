@@ -454,10 +454,12 @@ $($rows.ToString())
                 $stripReplay = '<div class="r" ' + $replayMarker + '[^>]*>[\s\S]*?</div>'
                 $stripFriends = '<div class="r" ' + $friendMarker + '[^>]*>[\s\S]*?</div>'
                 $stripLast = '<div class="r" ' + $lastMatchMarker + '[^>]*>[\s\S]*?</div>'
+                $stripThourOverlay = '(?:(?:<br>|\s)*)<span[^>]*' + $thourMarker + '[^>]*>[\s\S]*?</span>'
                 $o = $o -replace $stripOpened, ''
                 $o = $o -replace $stripReplay, ''
                 $o = $o -replace $stripFriends, ''
                 $o = $o -replace $stripLast, ''
+                $o = $o -replace $stripThourOverlay, ''
                 $numPattern = '(<div class="total"[^>]*>.*?</svg>)[\d,]+(</div>)'
                 if ($o -match $numPattern) {
                     $o = $o -replace $numPattern, ('${1}' + $confirmedText + '${2}')
@@ -466,7 +468,14 @@ $($rows.ToString())
                         # Only you + squad here. Prizes stay in their own report section.
                         $lastMatchDiv = "<div class=`"r`" $lastMatchMarker>You <b>$lastOpened</b> + $lastBroken broken = <b>$lastTotal</b> total &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime</div>"
                         $friendDiv = "<div class=`"r`" $friendMarker>$friendText</div>"
-                        $o = $o -replace $divPattern, ('${1}' + $lastMatchDiv + $friendDiv)
+                        $o = $o -replace $divPattern, ('${1}' + $lastMatchDiv + $friendDiv + $thourLine)
+                    }
+                    # One live countdown script in the overlay page too.
+                    if ($thourScript) {
+                        $oldScript = '<script[^>]*' + $thourScriptMarker + '[^>]*>[\s\S]*?</script>'
+                        $o = $o -replace $oldScript, ''
+                        $bodyClose = $o.LastIndexOf('</body>')
+                        if ($bodyClose -ge 0) { $o = $o.Insert($bodyClose, $thourScript) }
                     }
                     $oChanged = $true
                 }
