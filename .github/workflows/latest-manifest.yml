@@ -1,0 +1,43 @@
+name: Keep latest.json in sync with releases
+
+# One canonical file in the repository is what ChestCounter reads first. Every published
+# (or edited) release rewrites it, so any build released from anywhere is picked up by
+# Check for updates without changing the program.
+on:
+  release:
+    types: [published, edited, released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild latest.json from the newest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          gh api "repos/$REPO/releases/latest" > /tmp/rel.json
+          tag=$(jq -r .tag_name /tmp/rel.json)
+          url=$(jq -r '.assets[] | select(.name == "ChestCounter.exe") | .browser_download_url' /tmp/rel.json)
+          if [ -z "$url" ] || [ "$url" = "null" ]; then echo "No ChestCounter.exe asset"; exit 1; fi
+          size=$(jq -r '.assets[] | select(.name == "ChestCounter.exe") | .size' /tmp/rel.json)
+          published=$(jq -r .published_at /tmp/rel.json)
+          notes=$(jq -r .body /tmp/rel.json)
+          curl -fsSL "$url" -o /tmp/ChestCounter.exe
+          sha=$(sha256sum /tmp/ChestCounter.exe | cut -d' ' -f1)
+          jq -n --arg version "${tag#v}" --arg tag "$tag" --arg url "$url" \
+            --argjson size "${size:-0}" --arg published "$published" --arg notes "$notes" --arg sha "$sha" \
+            '{version:$version,tag:$tag,url:$url,size:$size,sha256:$sha,published:$published,notes:$notes}' > latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "latest.json: $tag"
+            git push
+          fi
