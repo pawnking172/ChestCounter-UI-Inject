@@ -28,6 +28,7 @@ The counter checks a single file in this repository, [`latest.json`](latest.json
 - The default setting, **Installed automatically**, downloads and starts the new build by itself. The app re-checks every 5 minutes while it is open — no restart needed.
 - **Settings → Updates** lets you choose *Installed automatically*, *Offered* or *Off*, shows the installed version and has a **Download the latest build** button.
 - Older installed builds still find new releases through the GitHub releases API.
+- **New weeks and events, no new exe:** the treasure data file (`content/content.json`) is read from GitHub at startup and every 5 minutes, so a new week, prize ids, events or notices appear in an open counter within seconds. The Activity log confirms it with `Treasure data updated: revision N`.
 
 ## What is different from the original build
 
