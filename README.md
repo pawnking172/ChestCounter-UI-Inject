@@ -1,8 +1,63 @@
-# ChestCounter UI Addon
+# ChestCounter — UI Addon Build
+
+[![Latest release](https://img.shields.io/github/v/release/pawnking172/ChestCounter-UI-Inject?color=gold&label=latest)](https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/pawnking172/ChestCounter-UI-Inject/total?color=3fd1c5)](https://github.com/pawnking172/ChestCounter-UI-Inject/releases)
+
+**ChestCounter** counts the chests you open in Fortnite, match after match, straight from your replay files — with an in-game overlay and a detailed HTML report. This repository publishes a **modified Windows build** with extra UI features already compiled in: you only download one `.exe`, no scripts to install.
+
+This is an independent build based on the original open-source project by **LED-N**: [LED-N/Fortnite-ChestCounter](https://github.com/LED-N/Fortnite-ChestCounter). All credit for the original counter goes there.
+
+## Download and run
+
+- **Releases page (all versions):** https://github.com/pawnking172/ChestCounter-UI-Inject/releases
+- **Latest version:** https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
+- **Direct EXE download:** https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest/download/ChestCounter.exe
+
+1. Download `ChestCounter.exe` and run it.
+2. If Windows says *"Windows protected your PC"*, click **More info → Run anyway** (the exe is not code-signed).
+3. Enable ** recorded replays** in Fortnite; the counter reads them and updates the total.
+4. Give the app a few seconds; the report and overlay open automatically.
+
+Your data, settings and counted chests are kept between updates.
+
+## Updates: automatic, no work on every release
+
+The counter checks a single file in this repository, [`latest.json`](latest.json), which always names the newest build, its direct download URL, size, SHA-256 checksum and release notes. Every time a release is published, that file is rewritten automatically by the publish script and a GitHub Action — so a new version reaches users without you touching their PC.
+
+- **Check for updates** reads `latest.json` first and falls back to the GitHub API.
+- The default setting, **Installed automatically**, downloads and starts the new build by itself. The app re-checks every 5 minutes while it is open — no restart needed.
+- **Settings → Updates** lets you choose *Installed automatically*, *Offered* or *Off*, shows the installed version and has a **Download the latest build** button.
+- Older installed builds still find new releases through the GitHub releases API.
+
+## What is different from the original build
+
+- A `Last: <count> chests @ <time> | Team: <count>` line next to the total in `report.html` and `overlay.html`.
+- An **All treasure prizes** table at the end of the report: every week plus the Pirate Shop, with images, odds and `Got it ×count (date)` markers. Prizes you confirmed yourself can be added to `cc-prize-manual.json`.
+- A **Last match — you & squad** section with exact per-player counts. A teammate outside replay range (~150 m) is shown as `not in range`, never `0`.
+- A **Map** tab using the current island image with verified spawn points and 9 vaults (4 rare chests + 1 rare sprite chest each), with zoom, pan, fullscreen and filters.
+- Live Treasure Hour and Captain's Day banners plus an **Events** tab with token facts, countdowns, next times and source links. **Your token progress** shows your chance at Epic's base odds (1 in 137,500) from your verified chest count.
+- A momentum chart, tab icons, appearance settings (theme and accent), live-counting controls, and a fast overlay that updates without flicker.
+- The embedded injector re-applies the report/overlay changes after the program rewrites those pages, and only writes a file when its bytes actually change.
+
+## Counts stay honest
+
+The displayed total starts from the confirmed Fortnite baseline in `cc-counts.json`:
+
+```json
+{ "treasure": 965, "rare": 71, "sprite": 32 }
+```
+
+That is **1,068** chests, then it grows with each new match. teamp totals come from replay events; ammo boxes and pirate cannon shots are not counted. Replays only record players near you (~150 m), so missing far-away teammates are reported as `not in range`, not zero.
+
+See [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the full changelog of the current build.
+
+---
+
+## العربية
 
 نسخة من **ChestCounter** مع تعديلات واجهة على التقرير والـ overlay. الملف التنفيذي نفسه مبني من مصدر البرنامج الرسمي، والتعديلات مدمجة داخله — ما تحتاج تشغّل أي سكربت يدوي.
 
-## تحميل النسخة المعدّلة
+### تحميل النسخة المعدّلة
 
 - **الصفحة الرئيسية في GitHub** (كل النسخ تنزل فيها): https://github.com/pawnking172/ChestCounter-UI-Inject/releases — ومنها `latest.json` اللي يقرأه البرنامج.
 - أحدث نسخة: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
@@ -12,7 +67,7 @@
 
 لصديقك: حمّل `ChestCounter.exe` من الرابط المباشر، شغّله (لو طلع SmartScreen: More info → Run anyway)، وبعدين زر **Check for updates** يوصله أي تحديث جديد. `enable-updates.reg` ما يحتاجه لأن الرابط مدمج في النسخة المبنية.
 
-## وش فيه جديد على الأصلي
+### وش فيه جديد على الأصلي
 
 1. سطر `Last: <عدد> chests @ <وقت> | Team: <عدد>` جنب التوتال في `report.html` و `overlay.html`.
 2. قسم مستقل `All treasure prizes — every week` في آخر `report.html` يعرض كل جوائز الأسابيع + Pirate Shop، واللي حصلت عليها أنت أو الفريق موسوم بـ `Got it` مع العدد والتاريخ (وتقدر تضيف جوائز أكدتها بنفسك عبر `cc-prize-manual.json`). الجوايز تبقى كمان في أقسام البرنامج الأصلية.
@@ -33,7 +88,7 @@
 10. كل تبويب صار له أيقونة، وتبويب **Home** يبدأ ببانر يعرض اسم الماب الحالي واسم حسابك. تبويب **Home** فيه كرت `Momentum` جديد: رسم بياني لآخر 30 مباراة (كل عمود فيه تاريخ وعدد الصناديق لما تمرر الماوس)، مع الرقم القياسي ومتوسط آخر 5 مباريات والسلسلة الحالية والاتجاه. الإعدادات فيه قسم **Appearance** جديد: ثيم داكن/فاتر/زي Windows وست ألوان (Gold, Ocean, Emerald, Violet, Rose, Ember) — التغيير فوري ومحفوظ، ويخص نافذة البرنامج بس مو الـ overlay ولا OBS.
 11. تبويب **Events** جديد: قائمة بكل الأحداث المهمة (دليل التوكن، Treasure Hour، Captain's Day، إعادة الجوائز الأسبوعية). كل كرت فيه: وش الحدث، وش يعطيك، وكيف يأثر على التوكن — مع الحالة (شغال الآن/يبدأ بعد)، العدّ التنازلي، المواعيد القادمة، ورابط المصدر. الحقيقة واضحة: Treasure Hour هو الوحيد اللي يرفع احتمال التوكن (1/137,500 → 1/91,667 ×1.5 أو 1/68,750 ×2)، أما Captain's Day ما يغير الاحتمال بس يبدّل جوائز الأسبوع. النصوص من `content.json` فتتحدث بدون تحديث البرنامج. وفوق القائمة كرت **Your token progress** يحسب احتمال التوكن من عدد صناديقك المؤكد (1/137,500) وكم صندوق تحتاج لـ50%، وزر **Events** صار موجود كمان في Home.
 
-## العدد المؤكد من Fortnite
+### العدد المؤكد من Fortnite
 
 عدّل `cc-counts.json` في مجلد بيانات البرنامج `%APPDATA%\ChestCounter`:
 
@@ -43,7 +98,7 @@
 
 التوتال المعروض = المجموع (1,068)، ويبقى سطر الريبلايز منفصل عشان تعرف الفرق.
 
-## الجوائز اللي الريبلايز ما يقدر يشوفها
+### الجوائز اللي الريبلايز ما يقدر يشوفها
 
 عدّل `cc-prize-manual.json` في مجلد بيانات البرنامج `%APPDATA%\ChestCounter`:
 
@@ -58,11 +113,11 @@
 - `by` إما `you` أو `squad`.
 - سطر نصي عادي (مثل `"w2-jam"`) يعني أنك جبتها بنفسك.
 
-## المصدر الرسمي
+### المصدر الرسمي
 
 https://github.com/LED-N/Fortnite-ChestCounter/releases/latest
 
-## ملاحظات
+### ملاحظات
 
 - البيانات تُقرأ من `%APPDATA%\ChestCounter\data.json` و `content.json` و `config.json`.
 - الملفات `cc-ui-inject.ps1` و `cc-prize-manual.json` و `cc-counts.json` تُستخرج تلقائياً في مجلد البيانات عند أول تشغيل.
