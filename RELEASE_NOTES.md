@@ -1,15 +1,14 @@
-**English** â€” ChestCounter UI addon build 1.5.50. Week 4 treasure prizes are now named and pictured in the report.
+**English** â€” ChestCounter UI addon build 1.5.51. The Last match view now breaks your chests down by opened and broken, each with its own time.
 
-**What's new in 1.5.50**
-- **Week 4 (Oscar Arrives, live now):** the five prizes are no longer generic placeholders. The All treasure prizes table now shows Solid Gold Kasane Teto, Solid Gold High Tide and Wavecutter, Wellerman, Oscar's Wraps and the Gold Lamborghini Urus SE Decal, with their real pictures from fortnite.bot.
-- **Week 5 (starts Nov 29):** the reported names are listed as well (Solid Gold Captain X, Roasted Meat, I Follow Rivers, Jones and the Straw Hats, Gold Mercedes-AMG G 63 Sleek Decal), clearly marked "(reported)" until they go live. No picture is shown yet.
-- content.json revision 5: an open counter picks it up within minutes (GitHub API, checked every 5 minutes) without any action from you.
-- Counts, replay analysis, map, overlay and events are unchanged.
-
----
-
-**Franأ§ais** â€” Build 1.5.50 : les prix de la semaine 4 portent enfin leur vrai nom et leur image dans le rapport. Semaine 5 indiquأ©e آ« reported آ». Les comptages ne changent pas.
+**What's new in 1.5.51**
+- **Last match, in the report and the overlay:** shows **Opened n @ time**, **Broken n @ time**, **Total n @ time** and **Team n @ time** instead of one total. The time of each count comes from the replay (match start + the chest's recorded offset), so it is the moment of the last opened / last broken chest â€” never a guess.
+- The Last match table now has Opened / Broken / Total columns for you; teammates keep their own total, or "not in range" when the replay cannot see them.
+- Counts, treasure prizes, chances, map, overlay style and events are unchanged.
 
 ---
 
-**Espaأ±ol** â€” Build 1.5.50: los premios de la semana 4 ya muestran su nombre e imagen reales en el informe. Semana 5 marcada como آ« reported آ». Los conteos no cambian.
+**Franأ§ais** â€” Build 1.5.51 : la derniأ¨re partie affiche les coffres **ouverts** et **dأ©truits** sأ©parأ©ment, chacun avec son heure, plus le total et l'أ©quipe. Les comptages ne changent pas.
+
+---
+
+**Espaأ±ol** â€” Build 1.5.51: la أ؛ltima partida muestra los cofres **abiertos** y **rotos** por separado, cada uno con su hora, ademأ،s del total y del equipo. Los conteos no cambian.
