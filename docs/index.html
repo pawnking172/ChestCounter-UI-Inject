@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ChestCounter — مركز التحميل</title>
+<style>
+  :root{--bg:#0b1015;--card:#141c25;--line:#253343;--ink:#ecf1f7;--mut:#9fb0c3;--gold:#f2c14e;--gold2:#ffdc8a;--ok:#3fd1c5;--warn:#ff8a6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1100px 520px at 85% -10%,rgba(242,193,78,.14),transparent 60%),var(--bg);color:var(--ink);font:16px/1.8 "Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}
+  .wrap{max-width:960px;margin:0 auto;padding:34px 18px 60px}
+  header{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:22px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .chest{font-size:38px;line-height:1;filter:drop-shadow(0 3px 8px rgba(242,193,78,.35))}
+  h1{font-size:24px;margin:0;letter-spacing:.2px}
+  .sub{color:var(--mut);font-size:13px;margin-top:2px}
+  .chip{display:inline-flex;gap:7px;align-items:center;border:1px solid var(--line);background:#101822;border-radius:999px;padding:7px 13px;font-size:13px;color:var(--mut)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}
+  .dot.ok{background:var(--ok);box-shadow:0 0 9px var(--ok)}
+  .dot.bad{background:var(--warn)}
+  .hero{background:linear-gradient(135deg,rgba(242,193,78,.10),var(--card) 55%);border:1px solid rgba(242,193,78,.30);border-radius:18px;padding:26px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+  .label{color:var(--gold2);font-size:13px;font-weight:700;letter-spacing:.4px}
+  .ver{font-size:46px;font-weight:800;line-height:1.25;margin:4px 0 2px;color:#fff;direction:ltr;text-align:right}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--mut);font-size:13px;margin-bottom:20px}
+  .meta b{color:var(--ink);font-weight:600}
+  .actions{display:flex;flex-wrap:wrap;gap:10px}
+  a.btn,button.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;padding:12px 20px;font-weight:700;font-size:15px;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:#1a2431;color:var(--ink);transition:transform .12s,filter .12s}
+  a.btn:hover,button.btn:hover{transform:translateY(-1px);filter:brightness(1.12)}
+  .btn.main{background:linear-gradient(135deg,var(--gold),#e0a52d);color:#2a1c00;border-color:transparent;box-shadow:0 8px 24px rgba(242,193,78,.22)}
+  section{margin-top:26px}
+  h2{font-size:18px;margin:0 0 12px;color:var(--gold2)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  ol{margin:0;padding-inline-start:22px}
+  li{margin:7px 0}
+  code{background:#0b1119;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font:12.5px/1.7 Consolas,monospace;color:var(--gold2);direction:ltr;display:inline-block}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px}
+  .file{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px 14px;text-decoration:none;color:var(--ink);transition:border-color .12s}
+  .file:hover{border-color:var(--gold)}
+  .file .n{font:13px Consolas,monospace;direction:ltr;overflow-wrap:anywhere}
+  .file .d{color:var(--mut);font-size:12px;white-space:nowrap}
+  .notes{white-space:pre-wrap;color:var(--mut);font-size:14px;max-height:300px;overflow:auto}
+  .note{color:var(--warn);font-size:13px;margin-top:12px;display:none}
+  footer{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;color:var(--mut);font-size:12.5px}
+  a.link{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="chest">📦</div><div><h1>ChestCounter — مركز التحميل</h1><div class="sub">كل ملفات النسخة المعدّلة في مكان واحد · يتحدث تلقائياً من GitHub</div></div></div>
+    <div class="chip"><span class="dot" id="dot"></span><span id="status">جاري الفحص…</span></div>
+  </header>
+
+  <div class="hero">
+    <div class="label">أحدث نسخة منشورة</div>
+    <div class="ver" id="version">—</div>
+    <div class="meta">
+      <span>التاريخ: <b id="date">—</b></span>
+      <span>الحجم: <b id="size">—</b></span>
+      <span>المستودع: <b>pawnking172/ChestCounter-UI-Inject</b></span>
+    </div>
+    <div class="actions">
+      <a class="btn main" id="download" href="https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest/download/ChestCounter.exe">⬇ تحميل ChestCounter.exe</a>
+      <a class="btn" href="https://github.com/pawnking172/ChestCounter-UI-Inject/releases">كل الإصدارات</a>
+      <button class="btn" id="refresh" type="button">تحديث الصفحة</button>
+    </div>
+    <div class="note" id="note"></div>
+  </div>
+
+  <section>
+    <h2>كيف يشغّلها خويك؟</h2>
+    <div class="card"><ol>
+      <li>يضغط <b>تحميل ChestCounter.exe</b> فوق ويشغّل الملف.</li>
+      <li>إذا طلع Windows SmartScreen: <b>More info → Run anyway</b>.</li>
+      <li>يفتح البرنامج ويشغّل Replays؛ زر <b>Check for updates</b> يجيه أي تحديث جديد لحاله.</li>
+      <li>للتحديث اليدوي: <b>Settings → Updates → Download the latest build</b>.</li>
+    </ol></div>
+  </section>
+
+  <section>
+    <h2>كل الملفات (روابط مباشرة)</h2>
+    <div class="grid" id="files">
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/enable-updates.reg"><span class="n">enable-updates.reg</span><span class="d">إعداد التحديث</span></a>
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/install.ps1"><span class="n">install.ps1</span><span class="d">مثبّت الواجهة</span></a>
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/cc-ui-inject.ps1"><span class="n">cc-ui-inject.ps1</span><span class="d">حقن التقرير</span></a>
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/cc-prize-manual.json"><span class="n">cc-prize-manual.json</span><span class="d">الجوائز المؤكدة</span></a>
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/cc-counts.json"><span class="n">cc-counts.json</span><span class="d">الأعداد المؤكدة</span></a>
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/content/content.json"><span class="n">content/content.json</span><span class="d">بيانات الأحداث</span></a>
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/README.md"><span class="n">README.md</span><span class="d">الشرح الكامل</span></a>
+      <a class="file" href="https://raw.githubusercontent.com/pawnking172/ChestCounter-UI-Inject/main/RELEASE_NOTES.md"><span class="n">RELEASE_NOTES.md</span><span class="d">ملاحظات الإصدار</span></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>وش جديد في هالنسخة؟</h2>
+    <div class="card notes" id="notes">—</div>
+  </section>
+
+  <footer>
+    <span>آخر فحص: <span id="checked">—</span> · يتحدث كل 5 دقائق تلقائياً</span>
+    <span><a class="link" href="https://github.com/pawnking172/ChestCounter-UI-Inject">فتح المستودع على GitHub</a></span>
+  </footer>
+</div>
+<script>
+const REPO='pawnking172/ChestCounter-UI-Inject';
+const BASE='https://api.github.com/repos/'+REPO;
+const DIRECT='https://github.com/'+REPO+'/releases/latest/download/ChestCounter.exe';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function notes(body){
+  const en=(body||'').replace(/\r\n/g,'\n').split(/^\s*-{3,}\s*$/m).find(x=>x.trimStart().startsWith('**English**'))||body||'';
+  return en.split('\n').filter(l=>/^[-*] /.test(l.trim())).map(l=>'• '+l.trim().replace(/^[-*] /,'').replace(/\*\*|`/g,'')).join('\n')||'لا توجد ملاحظات لهذا الإصدار.';
+}
+async function load(){
+  $('status').textContent='جاري الفحص…'; $('dot').className='dot';
+  try{
+    const r=await fetch(BASE+'/releases/latest?x='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const rel=await r.json();
+    const asset=(rel.assets||[]).find(a=>String(a.name).toLowerCase()==='chestcounter.exe');
+    const tag=String(rel.tag_name||'');
+    $('version').textContent=tag.replace(/^v/i,'')||'—';
+    $('date').textContent=rel.published_at?new Date(rel.published_at).toLocaleDateString('ar',{year:'numeric',month:'short',day:'numeric'}):'—';
+    $('size').textContent=asset?(asset.size/1048576).toFixed(1)+' MB':'—';
+    if(asset)$('download').href=asset.browser_download_url; else $('download').href=DIRECT;
+    $('notes').textContent=notes(rel.body);
+    $('status').textContent='مربوط بـ GitHub'; $('dot').className='dot ok';
+    $('note').style.display='none';
+    const files=await fetch(BASE+'/contents?x='+Date.now(),{cache:'no-store'}).catch(()=>null);
+    if(files&&files.ok){const list=await files.json();showFiles(list);}
+  }catch(e){
+    $('status').textContent='تعذر قراءة API — الروابط المباشرة شغالة'; $('dot').className='dot bad';
+    $('note').textContent='ما قدرت أقرأ GitHub API الحين (-connect أو حد الطلبات). زر التحميل يفتح أحدث إصدار مباشرة من GitHub حتى لو فشل الفحص.';
+    $('note').style.display='block';
+    $('version').textContent='افتح الرابط'; $('notes').textContent='أعد المحاولة بعد شوي.';
+  }
+  $('checked').textContent=new Date().toLocaleTimeString('ar');
+}
+function showFiles(list){
+  const want=['enable-updates.reg','install.ps1','cc-ui-inject.ps1','cc-prize-manual.json','cc-counts.json','README.md','RELEASE_NOTES.md','content/content.json'];
+  const by=new Map(list.map(f=>[f.path,f]));
+  const desc={'enable-updates.reg':'إعداد التحديث','install.ps1':'مثبّت الواجهة','cc-ui-inject.ps1':'حقن التقرير','cc-prize-manual.json':'الجوائز المؤكدة','cc-counts.json':'الأعداد المؤكدة','content/content.json':'بيانات الأحداث','README.md':'الشرح الكامل','RELEASE_NOTES.md':'ملاحظات الإصدار'};
+  const html=want.filter(p=>by.has(p)).map(p=>{
+    const f=by.get(p);
+    return '<a class="file" href="'+esc(f.download_url||f.html_url)+'"><span class="n">'+esc(p)+'</span><span class="d">'+esc(desc[p]||'')+'</span></a>';
+  }).join('');
+  if(html)$('files').innerHTML=html;
+}
+$('refresh').addEventListener('click',load);
+load();
+setInterval(load,300000);
+</script>
+</body>
+</html>
