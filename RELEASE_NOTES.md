@@ -1,4 +1,4 @@
-﻿**English** — ChestCounter build 1.5.48. From now on the program reads one canonical file in the repository, so every new release reaches everyone who clicks **Check for updates**.
+**English** — ChestCounter build 1.5.48. From now on the program reads one canonical file in the repository, so every new release reaches everyone who clicks **Check for updates**.
 
 **What's new in 1.5.48**
 - **One source of truth:** `latest.json` in the repository names the newest build, its direct download URL, size, SHA-256 and release notes. `Check for updates` reads it first; GitHub's API is only a fallback. Every release rewrites that file automatically (publish script + GitHub Actions), so a version published anywhere is picked up right away.
