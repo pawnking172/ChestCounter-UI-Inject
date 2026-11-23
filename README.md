@@ -4,7 +4,7 @@
 
 ## تحميل النسخة المعدّلة
 
-- **واجهة التحميل (أسهل شيء لخويك)**: https://pawnking172.github.io/ChestCounter-UI-Inject/ — تعرض أحدث نسخة وكل الملفات، وتتحدث لحالها من GitHub.
+- **الصفحة الرئيسية في GitHub** (كل النسخ تنزل فيها): https://github.com/pawnking172/ChestCounter-UI-Inject/releases — ومنها `latest.json` اللي يقرأه البرنامج.
 - أحدث نسخة: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
 - تحميل مباشر: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest/download/ChestCounter.exe
 
