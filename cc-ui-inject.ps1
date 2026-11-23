@@ -149,15 +149,29 @@ while ($true) {
         $liveTotalText = & $fmtNum $liveTotal
         $liveSquadText = & $fmtNum ($liveTotal + $teamLive)
 
-        # Last match: only the total for you and every teammate by username.
+        # Last match: opened / broken / total, each with its own time.
+        # A chest carries TimeSeconds (seconds into the replay), so the clock time of
+        # the event is match start + that offset. Never guess when the data is missing.
         $lastOpened = 0; $lastBroken = 0
+        $lastOpenedAt = '--:--'; $lastBrokenAt = '--:--'; $lastEventSec = -1.0
         if ($last) {
+            $lastStartLocal = [datetime]::Parse([string]$last.MatchStartUtc).ToLocalTime()
             foreach ($c in @($last.Chests)) {
-                if ($c.Destroyed) { $lastBroken++ } else { $lastOpened++ }
+                $sec = if ($null -ne $c.TimeSeconds) { [double]$c.TimeSeconds } else { -1.0 }
+                if ($sec -gt $lastEventSec) { $lastEventSec = $sec }
+                if ($c.Destroyed) {
+                    $lastBroken++
+                    if ($sec -ge 0) { $lastBrokenAt = $lastStartLocal.AddSeconds($sec).ToString('HH:mm') }
+                } else {
+                    $lastOpened++
+                    if ($sec -ge 0) { $lastOpenedAt = $lastStartLocal.AddSeconds($sec).ToString('HH:mm') }
+                }
             }
         }
         $lastTotal = $lastOpened + $lastBroken
         $lastTime = if ($last) { [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm') } else { '--:--' }
+        # Time of the total = the last chest event of that match (falls back to match start).
+        $lastTotalTime = if ($lastEventSec -ge 0) { $lastStartLocal.AddSeconds($lastEventSec).ToString('HH:mm') } else { $lastTime }
         $friendRows = New-Object System.Text.StringBuilder
         $friendBits = New-Object System.Collections.Generic.List[string]
         foreach ($tm in @($last.TeamChests)) {
@@ -165,15 +179,15 @@ while ($true) {
             # A replay only records players near the recorder. No recorded action means "unknown", never zero.
             $tmSeen = [bool]$tm.Observed -or [int]$tm.Chests -gt 0
             if ($tmSeen) {
-                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td><b>$($tm.Chests)</b></td></tr>")
+                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td class=`"muted`">&mdash;</td><td class=`"muted`">&mdash;</td><td><b>$($tm.Chests)</b> <span class=`"muted`">@ $lastTime</span></td></tr>")
                 [void]$friendBits.Add("$tmName $($tm.Chests)")
             } else {
-                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td class=`"muted`" title=`"That teammate was too far away: the replay cannot see their chests.`">not in range</td></tr>")
+                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td colspan=`"3`" class=`"muted`" title=`"That teammate was too far away: the replay cannot see their chests.`">not in range</td></tr>")
                 [void]$friendBits.Add("$tmName not in range")
             }
         }
         if ($friendRows.Length -eq 0) {
-            [void]$friendRows.AppendLine('<tr><td colspan="2" class="muted">No teammates in this replay</td></tr>')
+            [void]$friendRows.AppendLine('<tr><td colspan="4" class="muted">No teammates in this replay</td></tr>')
             $friendText = 'no teammates'
         } else {
             $friendText = $friendBits -join ' &middot; '
@@ -302,7 +316,7 @@ while ($true) {
                     }
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
-                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: You <b>$lastTotal</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span>"
+                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: Opened <b>$lastOpened</b> @ $lastOpenedAt &middot; Broken <b>$lastBroken</b> @ $lastBrokenAt &middot; Total <b>$lastTotal</b> @ $lastTotalTime &middot; Team <b>$($last.TeamChestsOpened)</b> @ $lastTime &mdash; $friendText</span>"
                         $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b> (grows with new chests)</span>"
                         $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
                         $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $confirmedLine + $replayLine)
@@ -320,11 +334,11 @@ while ($true) {
                 $lastSection = @"
 <section class="card" $lastMatchMarker style="padding:16px 18px;margin-top:18px">
 <h2>Last match &mdash; you &amp; squad</h2>
-<p class="muted">$lastTime &middot; You <b>$lastTotal</b> total &middot; Team <b>$($last.TeamChestsOpened)</b></p>
+<p class="muted">Opened <b>$lastOpened</b> @ $lastOpenedAt &middot; Broken <b>$lastBroken</b> @ $lastBrokenAt &middot; Total <b>$lastTotal</b> @ $lastTotalTime &middot; Team <b>$($last.TeamChestsOpened)</b> @ $lastTime</p>
 <table class="ctable" style="width:100%;table-layout:auto">
-<thead><tr><th>Player</th><th style="width:100px">Total</th></tr></thead>
+<thead><tr><th>Player</th><th>Opened</th><th>Broken</th><th>Total</th></tr></thead>
 <tbody>
-<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td><b>$lastTotal</b></td></tr>
+<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td><b>$lastOpened</b> <span class="muted">@ $lastOpenedAt</span></td><td><b>$lastBroken</b> <span class="muted">@ $lastBrokenAt</span></td><td><b>$lastTotal</b> <span class="muted">@ $lastTotalTime</span></td></tr>
 $($friendRows.ToString())
 </tbody></table>
 </section>
@@ -449,9 +463,11 @@ $($rows.ToString())
             $o = Read-Text $overlayPath
             $originalOverlay = $o
             $oChanged = $false
-            if ($last -and $o -notmatch $marker -and $o -match '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)') {
-                $t = [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm')
-                $overlayTag = "@ $t | Team: $($last.TeamChestsOpened)"
+            # Strip the previous tag first: it changes when another chest is opened/broken.
+            $stripLastTag = '(?:(?:<br>|\s)*)<span[^>]*' + $marker + '[^>]*>[\s\S]*?</span>'
+            $o = $o -replace $stripLastTag, ''
+            if ($last -and $o -match '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)') {
+                $overlayTag = "O $lastOpened @ $lastOpenedAt | B $lastBroken @ $lastBrokenAt | T $lastTotal @ $lastTotalTime | Team $($last.TeamChestsOpened)"
                 $o = $o -replace '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)', "`${1}<span class=`"sep`" $marker>$overlayTag</span>`${2}"
                 $oChanged = $true
             }
