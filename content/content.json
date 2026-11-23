@@ -1,0 +1,438 @@
+{
+  "schema": 1,
+  "revision": 4,
+  "updated": "2026-11-23",
+  "about": "Treasure hunt data shown by Chest Counter (report, odds, collection). Edit it on main and raise 'revision': every counter picks it up at its next start. Schema in src/ChestCounter/TreasureCatalog.cs.",
+  "sources": {
+    "odds": "https://x.com/FortniteStatus/status/2119202610322227327",
+    "treasureHours": "https://fortnite.bot"
+  },
+  "odds": [
+    {
+      "kind": "outfit",
+      "oneIn": 1562500,
+      "weekly": true
+    },
+    {
+      "kind": "pirate-shop",
+      "oneIn": 137500,
+      "weekly": false
+    },
+    {
+      "kind": "car",
+      "oneIn": 7813,
+      "weekly": true
+    },
+    {
+      "kind": "pickaxe",
+      "oneIn": 568,
+      "weekly": true
+    },
+    {
+      "kind": "jam",
+      "oneIn": 391,
+      "weekly": true
+    },
+    {
+      "kind": "loading",
+      "oneIn": 272,
+      "weekly": true
+    },
+    {
+      "kind": "gizmo",
+      "oneIn": 127,
+      "weekly": false
+    }
+  ],
+  "pirateShop": {
+    "id": "pirate-shop",
+    "kind": "pirate-shop",
+    "name": "Pirate Shop Access",
+    "image": "https://cdn.fortnite.bot/s43treasure/token.webp",
+    "prizeIds": [
+      "9f73f94d-2e61-4523-97d7-d61235d3365e"
+    ]
+  },
+  "weeks": [
+    {
+      "number": 1,
+      "start": "2026-11-01T14:00:00Z",
+      "end": "2026-11-08T14:00:00Z",
+      "title": "A$AP Arrives",
+      "prizes": [
+        {
+          "id": "w1-outfit",
+          "kind": "outfit",
+          "name": "Solid Gold A$AP Rocky",
+          "image": "https://cdn.fortnite.bot/s43treasure/w1-outfit.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item1"
+          ]
+        },
+        {
+          "id": "w1-pickaxe",
+          "kind": "pickaxe",
+          "name": "Solid Gold A$AP Rocky's Gauntlets",
+          "image": "https://cdn.fortnite.bot/s43treasure/w1-pickaxe.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item2"
+          ]
+        },
+        {
+          "id": "w1-car",
+          "kind": "car",
+          "name": "Gold Mercedes-AMG G 63 Decal",
+          "image": "https://cdn.fortnite.bot/s43treasure/w1-car.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item5"
+          ]
+        },
+        {
+          "id": "w1-jam",
+          "kind": "jam",
+          "name": "No Trespassing",
+          "image": "https://cdn.fortnite.bot/s43treasure/w1-jam.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item3"
+          ]
+        },
+        {
+          "id": "w1-loading",
+          "kind": "loading",
+          "name": "Plunder in Paradise",
+          "image": "https://cdn.fortnite.bot/s43treasure/w1-loading.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item4"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "start": "2026-11-08T14:00:00Z",
+      "end": "2026-11-15T14:00:00Z",
+      "title": "Lil Uzi Arrives",
+      "prizes": [
+        {
+          "id": "w2-outfit",
+          "kind": "outfit",
+          "name": "Solid Gold Lil Uzi Vert",
+          "image": "https://cdn.fortnite.bot/s43treasure/w2-outfit.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item14"
+          ]
+        },
+        {
+          "id": "w2-backbling",
+          "kind": "pickaxe",
+          "name": "Diamond and Gold",
+          "image": "https://cdn.fortnite.bot/s43treasure/w2-backbling.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item15"
+          ]
+        },
+        {
+          "id": "w2-car",
+          "kind": "car",
+          "name": "Gold Cadillac CT5-V Decal",
+          "image": "https://cdn.fortnite.bot/s43treasure/w2-car.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item18"
+          ]
+        },
+        {
+          "id": "w2-jam",
+          "kind": "jam",
+          "name": "London",
+          "image": "https://cdn.fortnite.bot/s43treasure/w2-jam.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item16"
+          ]
+        },
+        {
+          "id": "w2-loading",
+          "kind": "loading",
+          "name": "So Kawaii",
+          "image": "https://cdn.fortnite.bot/s43treasure/w2-loading.webp?v=3",
+          "prizeIds": [
+            "DelilahPrize:dpid_item17"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "start": "2026-11-15T14:00:00Z",
+      "end": "2026-11-22T14:00:00Z",
+      "title": "Miku & Teto Arrive",
+      "prizes": [
+        {
+          "id": "w3-outfit",
+          "kind": "outfit",
+          "name": "Solid Gold Miku",
+          "image": "https://cdn.fortnite.bot/s43treasure/w3-outfit.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item19"
+          ]
+        },
+        {
+          "id": "w3-backbling",
+          "kind": "pickaxe",
+          "name": "Miku's Takarabako",
+          "image": "https://cdn.fortnite.bot/s43treasure/w3-backbling.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item20"
+          ]
+        },
+        {
+          "id": "w3-car",
+          "kind": "car",
+          "name": "Gold Chevrolet Corvette ZR1 Decal",
+          "image": "https://cdn.fortnite.bot/s43treasure/w3-car.webp?2",
+          "prizeIds": [
+            "DelilahPrize:dpid_item23"
+          ]
+        },
+        {
+          "id": "w3-jam",
+          "kind": "jam",
+          "name": "PPPP",
+          "image": "https://cdn.fortnite.bot/s43treasure/w3-jamtrack.webp?2",
+          "prizeIds": [
+            "DelilahPrize:dpid_item21"
+          ]
+        },
+        {
+          "id": "w3-loading",
+          "kind": "loading",
+          "name": "May Fortune Find You",
+          "image": "https://cdn.fortnite.bot/s43treasure/w3-loading.webp",
+          "prizeIds": [
+            "DelilahPrize:dpid_item22"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "start": "2026-11-22T14:00:00Z",
+      "end": "2026-11-29T14:00:00Z",
+      "title": "Oscar Arrives",
+      "prizes": [
+        {
+          "id": "w4-outfit",
+          "kind": "outfit",
+          "name": "Week 4 Gold Outfit",
+          "prizeIds": [
+            "DelilahPrize:dpid_item24"
+          ]
+        },
+        {
+          "id": "w4-pickaxe",
+          "kind": "pickaxe",
+          "name": "Week 4 Pickaxe or Back Bling",
+          "prizeIds": [
+            "DelilahPrize:dpid_item25"
+          ]
+        },
+        {
+          "id": "w4-jam",
+          "kind": "jam",
+          "name": "Week 4 Jam Track",
+          "prizeIds": [
+            "DelilahPrize:dpid_item26"
+          ]
+        },
+        {
+          "id": "w4-loading",
+          "kind": "loading",
+          "name": "Week 4 Loading Screen",
+          "prizeIds": [
+            "DelilahPrize:dpid_item27"
+          ]
+        },
+        {
+          "id": "w4-car",
+          "kind": "car",
+          "name": "Week 4 Vehicle & Decal",
+          "prizeIds": [
+            "DelilahPrize:dpid_item28"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "start": "2026-11-29T14:00:00Z",
+      "end": "2026-12-05T14:00:00Z",
+      "title": "The Final Hunt",
+      "prizes": [
+        {
+          "id": "w5-outfit",
+          "kind": "outfit",
+          "name": "Week 5 Gold Outfit",
+          "prizeIds": [
+            "DelilahPrize:dpid_item29"
+          ]
+        },
+        {
+          "id": "w5-pickaxe",
+          "kind": "pickaxe",
+          "name": "Week 5 Pickaxe or Back Bling",
+          "prizeIds": [
+            "DelilahPrize:dpid_item30"
+          ]
+        },
+        {
+          "id": "w5-jam",
+          "kind": "jam",
+          "name": "Week 5 Jam Track",
+          "prizeIds": [
+            "DelilahPrize:dpid_item31"
+          ]
+        },
+        {
+          "id": "w5-loading",
+          "kind": "loading",
+          "name": "Week 5 Loading Screen",
+          "prizeIds": [
+            "DelilahPrize:dpid_item32"
+          ]
+        },
+        {
+          "id": "w5-car",
+          "kind": "car",
+          "name": "Week 5 Vehicle & Decal",
+          "prizeIds": [
+            "DelilahPrize:dpid_item33"
+          ]
+        }
+      ]
+    }
+  ],
+  "treasureHours": [
+    {
+      "start": "2026-11-07T19:00:00Z",
+      "end": "2026-11-07T21:00:00Z",
+      "boosts": {
+        "outfit": 7.5,
+        "pirate-shop": 1.5,
+        "car": 10
+      },
+      "confirmed": true
+    },
+    {
+      "start": "2026-11-08T02:00:00Z",
+      "end": "2026-11-08T04:00:00Z",
+      "boosts": {
+        "outfit": 10,
+        "pirate-shop": 2,
+        "car": 10
+      },
+      "confirmed": true
+    },
+    {
+      "start": "2026-11-14T19:00:00Z",
+      "end": "2026-11-14T23:00:00Z",
+      "boosts": {
+        "outfit": 7.5,
+        "pirate-shop": 1.5,
+        "car": 10
+      },
+      "confirmed": true
+    },
+    {
+      "start": "2026-11-15T02:00:00Z",
+      "end": "2026-11-15T04:00:00Z",
+      "boosts": {
+        "outfit": 7.5,
+        "pirate-shop": 1.5,
+        "car": 10
+      },
+      "confirmed": false
+    },
+    {
+      "start": "2026-11-21T19:00:00Z",
+      "end": "2026-11-21T21:00:00Z",
+      "boosts": {
+        "outfit": 7.5,
+        "pirate-shop": 1.5,
+        "car": 10
+      },
+      "confirmed": false
+    },
+    {
+      "start": "2026-11-22T02:00:00Z",
+      "end": "2026-11-22T04:00:00Z",
+      "boosts": {
+        "outfit": 7.5,
+        "pirate-shop": 1.5,
+        "car": 10
+      },
+      "confirmed": false
+    },
+    {
+      "start": "2026-11-28T19:00:00Z",
+      "end": "2026-11-28T21:00:00Z",
+      "boosts": {
+        "outfit": 7.5,
+        "pirate-shop": 1.5,
+        "car": 10
+      },
+      "confirmed": false
+    },
+    {
+      "start": "2026-11-29T02:00:00Z",
+      "end": "2026-11-29T04:00:00Z",
+      "boosts": {
+        "outfit": 7.5,
+        "pirate-shop": 1.5,
+        "car": 10
+      },
+      "confirmed": false
+    }
+  ],
+  "notices": [],
+  "events": [
+    {
+      "id": "pirate-token",
+      "schedule": "always",
+      "icon": "🏴",
+      "name": { "fr": "Jeton d'accès à la boutique pirate", "en": "Pirate Shop Access Token", "es": "Token de acceso a la tienda pirata" },
+      "what": { "fr": "Un trésor de coffre doré. Ouvre n'importe quel coffre au trésor : quand il explose en or, tu reçois deux jetons, un pour 2026 et un pour 2027. En activer un rend tout l'Item Shop gratuit pendant 14 jours (tenues, pioches, sacs à dos...) sauf V-Bucks, cadeaux et niveaux de passe.", "en": "A golden-chest find. Open any treasure chest: when it explodes in gold you get two tokens, one for 2026 and one for 2027. Activating one makes the whole Item Shop free for 14 days (outfits, pickaxes, back blings...) except V-Bucks, gifts and pass levels.", "es": "Un tesoro de cofre dorado. Abre cualquier cofre del tesoro: cuando explota en oro recibes dos tokens, uno para 2026 y otro para 2027. Activar uno hace gratuita toda la tienda de objetos durante 14 días (trajes, picos, mochilas...) excepto V-Bucks, regalos y niveles del pase." },
+      "benefit": { "fr": "Tout ce qui se vend en V-Bucks dans la boutique, gratuit pendant deux semaines : c'est la raison pour laquelle tout le monde ouvre des coffres.", "en": "Every V-Bucks cosmetic in the shop, free for two weeks — the reason everyone is farming chests.", "es": "Todos los cosméticos de la tienda, gratis durante dos semanas: la razón por la que todos abren cofres." },
+      "token": { "fr": "Chance de base : 1 sur 137 500 coffres par jeton (Epic). Meilleurs lieux : Arlong Park, Lantern Landing, Loguetown, Plunder Port, Fortune's Fort, Busy Bay, Rubber Resort. Une partie rapide permet d'ouvrir ~50 coffres. Seules les Heures du trésor améliorent ces chances.", "en": "Base odds: 1 in 137,500 chests per token (Epic). Best spots: Arlong Park, Lantern Landing, Loguetown, Plunder Port, Fortune's Fort, Busy Bay, Rubber Resort. A fast game can open ~50 chests. Only Treasure Hours improve these odds.", "es": "Probabilidad base: 1 entre 137.500 cofres por token (Epic). Mejores zonas: Arlong Park, Lantern Landing, Loguetown, Plunder Port, Fortune's Fort, Busy Bay, Rubber Resort. Una partida rápida permite abrir ~50 cofres. Solo las Horas del Tesoro mejoran estas probabilidades." },
+      "link": "https://polygon.com/fortnite-chapter-7-mini-season-pirate-shop-access-token-free-how-to-get"
+    },
+    {
+      "id": "treasure-hour",
+      "schedule": "treasureHours",
+      "icon": "⚡",
+      "name": { "fr": "Heure du trésor", "en": "Treasure Hour", "es": "Hora del Tesoro" },
+      "what": { "fr": "Deux fenêtres de deux heures par semaine (samedi 19h-21h UTC et dimanche 02h-04h UTC), d'après le calendrier hebdomadaire.", "en": "Two two-hour windows a week (Saturday 19:00-21:00 UTC and Sunday 02:00-04:00 UTC), from the weekly schedule.", "es": "Dos ventanas de dos horas por semana (sábado 19:00-21:00 UTC y domingo 02:00-04:00 UTC), según el calendario semanal." },
+      "benefit": { "fr": "Les trésors sont boostés : jeton pirate ×1,5 (première heure) ou ×2 (deuxième), tenue en or jusqu'à ×10, véhicule ×10.", "en": "Treasure drops are boosted: Pirate token ×1.5 (first hour) or ×2 (second), gold outfit up to ×10, vehicle ×10.", "es": "Los tesoros mejoran: token pirata ×1,5 (primera hora) o ×2 (segunda), traje dorado hasta ×10, vehículo ×10." },
+      "token": { "fr": "Le seul événement qui augmente vraiment tes chances de jeton : 1/137 500 → 1/91 667 à ×1,5 et 1/68 750 à ×2. Garde tes coffres pour ces fenêtres.", "en": "The only event that really raises your token odds: 1/137,500 → 1/91,667 at ×1.5 and 1/68,750 at ×2. Save your chest farming for these windows.", "es": "El único evento que realmente sube tus probabilidades del token: 1/137.500 → 1/91.667 con ×1,5 y 1/68.750 con ×2. Guarda tus cofres para esas ventanas." },
+      "link": "https://polygon.com/fortnite-pirate-shop-access-token-treasure-odds-revealed"
+    },
+    {
+      "id": "captains-day",
+      "schedule": "captains",
+      "icon": "⚓",
+      "name": { "fr": "Jour du capitaine", "en": "Captain's Day", "es": "Día del Capitán" },
+      "what": { "fr": "24 heures à partir de chaque réinitialisation hebdo (dimanche 14h UTC / 9h ET). Un nouveau capitaine/boss arrive avec un Sprite unique, une arme signature et un lieu modifié ; le boss et son butin restent après l'événement.", "en": "24 hours from each weekly reset (Sunday 14:00 UTC / 9 am ET). A new captain/boss arrives with a unique Sprite, a signature weapon and a changed POI; the boss and its loot stay after the event.", "es": "24 horas desde cada reinicio semanal (domingo 14:00 UTC / 9 a. m. ET). Llega un nuevo capitán/jefe con un Sprite único, un arma característica y un lugar cambiado; el jefe y su botín se quedan después del evento." },
+      "benefit": { "fr": "Les trésors hebdomadaires changent : nouvelle tenue en or, décalque de véhicule, piste musicale et écran de chargement chaque semaine (semaine 4 : Oscar, semaine 5 : dernière chasse).", "en": "Weekly treasure rewards reset: new gold outfit, vehicle decal, jam track and loading screen every week (week 4: Oscar, week 5: final hunt).", "es": "Se reinician los tesoros semanales: nuevo traje dorado, calcomanía de vehículo, pista musical y pantalla de carga cada semana (semana 4: Oscar, semana 5: última cacería)." },
+      "token": { "fr": "Aucun changement direct pour le jeton (toujours 1/137 500). Utile pour les autres trésors de la semaine et les combats — mais pour le jeton, c'est l'Heure du trésor qui compte.", "en": "No direct change to token odds (still 1/137,500). Useful for the other weekly prizes and extra fights — but for the token, Treasure Hour is the event that matters.", "es": "No cambia directamente la probabilidad del token (sigue siendo 1/137.500). Útil para los otros premios semanales y los combates — pero para el token, lo que importa es la Hora del Tesoro." },
+      "link": "https://polygon.com/fortnite-chapter-7-mini-season-c7ms-captains-day-schedule-update"
+    },
+    {
+      "id": "weekly-treasures",
+      "schedule": "weeks",
+      "icon": "💎",
+      "name": { "fr": "Réinitialisation des trésors", "en": "Weekly treasure reset", "es": "Reinicio de tesoros semanales" },
+      "what": { "fr": "Chaque dimanche à 14h UTC commence une nouvelle semaine de trésors ; la dernière se termine le 5 décembre. Le tableau des prix du rapport suit ces semaines.", "en": "Every Sunday at 14:00 UTC a new treasure week starts; the last one ends Dec 5. The prize table in the report follows these weeks.", "es": "Cada domingo a las 14:00 UTC empieza una nueva semana de tesoros; la última termina el 5 de diciembre. La tabla de premios del informe sigue estas semanas." },
+      "benefit": { "fr": "Cinq tenues, véhicules, pistes musicales et écrans de chargement différents à trouver, chaque semaine avec son propre lot.", "en": "Five different outfits, vehicles, jam tracks and loading screens to find, each week with its own set.", "es": "Cinco trajes, vehículos, pistas musicales y pantallas de carga diferentes, cada semana con su propio lote." },
+      "token": { "fr": "Le jeton n'est pas hebdomadaire : les mêmes 1/137 500 courent jusqu'à la fin de la chasse, le 5 décembre. Plus tu ouvres de coffres d'ici là, plus tu as de chances.", "en": "The token is not weekly: the same 1/137,500 odds run until the hunt ends on Dec 5. More chests before then means more chances.", "es": "El token no es semanal: las mismas 1/137.500 probabilidades siguen hasta que termine la cacería, el 5 de diciembre. Más cofres antes de eso = más oportunidades." },
+      "link": "https://polygon.com/fortnite-pirate-shop-access-token-treasure-odds-revealed"
+    }
+  ]
+}
