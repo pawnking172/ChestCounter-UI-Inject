@@ -149,29 +149,15 @@ while ($true) {
         $liveTotalText = & $fmtNum $liveTotal
         $liveSquadText = & $fmtNum ($liveTotal + $teamLive)
 
-        # Last match: opened / broken / total, each with its own time.
-        # A chest carries TimeSeconds (seconds into the replay), so the clock time of
-        # the event is match start + that offset. Never guess when the data is missing.
+        # Last match: opened / broken / total. The program counts opened and broken
+        # (shot/destroyed) chests together, so both are shown separately here.
         $lastOpened = 0; $lastBroken = 0
-        $lastOpenedAt = '--:--'; $lastBrokenAt = '--:--'; $lastEventSec = -1.0
         if ($last) {
-            $lastStartLocal = [datetime]::Parse([string]$last.MatchStartUtc).ToLocalTime()
             foreach ($c in @($last.Chests)) {
-                $sec = if ($null -ne $c.TimeSeconds) { [double]$c.TimeSeconds } else { -1.0 }
-                if ($sec -gt $lastEventSec) { $lastEventSec = $sec }
-                if ($c.Destroyed) {
-                    $lastBroken++
-                    if ($sec -ge 0) { $lastBrokenAt = $lastStartLocal.AddSeconds($sec).ToString('HH:mm') }
-                } else {
-                    $lastOpened++
-                    if ($sec -ge 0) { $lastOpenedAt = $lastStartLocal.AddSeconds($sec).ToString('HH:mm') }
-                }
+                if ($c.Destroyed) { $lastBroken++ } else { $lastOpened++ }
             }
         }
         $lastTotal = $lastOpened + $lastBroken
-        $lastTime = if ($last) { [datetime]::Parse($last.MatchStartUtc).ToLocalTime().ToString('HH:mm') } else { '--:--' }
-        # Time of the total = the last chest event of that match (falls back to match start).
-        $lastTotalTime = if ($lastEventSec -ge 0) { $lastStartLocal.AddSeconds($lastEventSec).ToString('HH:mm') } else { $lastTime }
         $friendRows = New-Object System.Text.StringBuilder
         $friendBits = New-Object System.Collections.Generic.List[string]
         foreach ($tm in @($last.TeamChests)) {
@@ -179,7 +165,7 @@ while ($true) {
             # A replay only records players near the recorder. No recorded action means "unknown", never zero.
             $tmSeen = [bool]$tm.Observed -or [int]$tm.Chests -gt 0
             if ($tmSeen) {
-                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td class=`"muted`">&mdash;</td><td class=`"muted`">&mdash;</td><td><b>$($tm.Chests)</b> <span class=`"muted`">@ $lastTime</span></td></tr>")
+                [void]$friendRows.AppendLine("<tr><td>$tmName</td><td class=`"muted`">&mdash;</td><td class=`"muted`">&mdash;</td><td><b>$($tm.Chests)</b></td></tr>")
                 [void]$friendBits.Add("$tmName $($tm.Chests)")
             } else {
                 [void]$friendRows.AppendLine("<tr><td>$tmName</td><td colspan=`"3`" class=`"muted`" title=`"That teammate was too far away: the replay cannot see their chests.`">not in range</td></tr>")
@@ -271,7 +257,7 @@ while ($true) {
                     $teamFindLine = if ($teamFinds -gt 0) { "<br>+$teamFindText by the team (estimate)" } else { '' }
                     $cleanTiles = @"
 <section class="tiles hassquad">
-  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$heroNum</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: You <b>$lastTotal</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &middot; $lastTime &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
+  <div class="tile hero">$pencil<div class="k">Chests in total</div><div class="v num">$heroNum</div><div class="l">opened or destroyed by you &middot; $sessionTxt since the tool started<span style="display:block" $heroLastMarker>Last: Opened <b>$lastOpened</b> &middot; Broken <b>$lastBroken</b> &middot; Total <b>$lastTotal</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &mdash; $friendText</span><span style="display:block" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b></span><span style="display:block" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span></div></div>
   <div class="tile squadtile"><div class="v num">$squadText</div><div class="l">squad total<br>you + $teamText by your teammates</div></div>
   <div class="tile"><div class="v num">$(& $fmtNum $matchCount)</div><div class="l">matches analyzed</div></div>
   <div class="tile"><div class="v num">$avgText</div><div class="l">chests per match</div></div>
@@ -316,7 +302,7 @@ while ($true) {
                     }
                     $lblPattern = '(<div class="k">Chests in total</div><div class="v num">[\d,]+</div><div class="l">)([^<]*)'
                     if ($h -match $lblPattern) {
-                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: Opened <b>$lastOpened</b> @ $lastOpenedAt &middot; Broken <b>$lastBroken</b> @ $lastBrokenAt &middot; Total <b>$lastTotal</b> @ $lastTotalTime &middot; Team <b>$($last.TeamChestsOpened)</b> @ $lastTime &mdash; $friendText</span>"
+                        $heroLastLine = "<span style=`"display:block`" $heroLastMarker>Last: Opened <b>$lastOpened</b> &middot; Broken <b>$lastBroken</b> &middot; Total <b>$lastTotal</b> &middot; Team <b>$($last.TeamChestsOpened)</b> &mdash; $friendText</span>"
                         $confirmedLine = "<span style=`"display:block`" $openedMarker>Confirmed base: Treasure $($counts.treasure) &middot; Rare $($counts.rare) &middot; Sprite $($counts.sprite) = <b>$confirmedText</b> (grows with new chests)</span>"
                         $replayLine = "<span style=`"display:block`" $replayMarker>Replays: $openedText opened &middot; $brokenText broken/destroyed</span>"
                         $h = $h -replace $lblPattern, ('${1}${2}' + $heroLastLine + $confirmedLine + $replayLine)
@@ -334,11 +320,11 @@ while ($true) {
                 $lastSection = @"
 <section class="card" $lastMatchMarker style="padding:16px 18px;margin-top:18px">
 <h2>Last match &mdash; you &amp; squad</h2>
-<p class="muted">Opened <b>$lastOpened</b> @ $lastOpenedAt &middot; Broken <b>$lastBroken</b> @ $lastBrokenAt &middot; Total <b>$lastTotal</b> @ $lastTotalTime &middot; Team <b>$($last.TeamChestsOpened)</b> @ $lastTime</p>
+<p class="muted">Opened <b>$lastOpened</b> &middot; Broken <b>$lastBroken</b> &middot; Total <b>$lastTotal</b> &middot; Team <b>$($last.TeamChestsOpened)</b></p>
 <table class="ctable" style="width:100%;table-layout:auto">
 <thead><tr><th>Player</th><th>Opened</th><th>Broken</th><th>Total</th></tr></thead>
 <tbody>
-<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td><b>$lastOpened</b> <span class="muted">@ $lastOpenedAt</span></td><td><b>$lastBroken</b> <span class="muted">@ $lastBrokenAt</span></td><td><b>$lastTotal</b> <span class="muted">@ $lastTotalTime</span></td></tr>
+<tr><td><b>$(Html $last.PlayerName) (you)</b></td><td><b>$lastOpened</b></td><td><b>$lastBroken</b></td><td><b>$lastTotal</b></td></tr>
 $($friendRows.ToString())
 </tbody></table>
 </section>
@@ -467,7 +453,7 @@ $($rows.ToString())
             $stripLastTag = '(?:(?:<br>|\s)*)<span[^>]*' + $marker + '[^>]*>[\s\S]*?</span>'
             $o = $o -replace $stripLastTag, ''
             if ($last -and $o -match '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)') {
-                $overlayTag = "O $lastOpened @ $lastOpenedAt | B $lastBroken @ $lastBrokenAt | T $lastTotal @ $lastTotalTime | Team $($last.TeamChestsOpened)"
+                $overlayTag = "O $lastOpened | B $lastBroken | T $lastTotal | Team $($last.TeamChestsOpened)"
                 $o = $o -replace '(<div class="r "><span>Last</span>.*?<b>[\d,]+</b>)(</div>)', "`${1}<span class=`"sep`" $marker>$overlayTag</span>`${2}"
                 $oChanged = $true
             }
