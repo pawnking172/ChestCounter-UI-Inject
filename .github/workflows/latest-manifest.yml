@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main # release events otherwise check out a detached HEAD and `git push` fails
       - name: Rebuild latest.json from the newest release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,11 +35,13 @@ jobs:
           sha=$(sha256sum /tmp/ChestCounter.exe | cut -d' ' -f1)
           jq -n --arg version "${tag#v}" --arg tag "$tag" --arg url "$url" \
             --argjson size "${size:-0}" --arg published "$published" --arg notes "$notes" --arg sha "$sha" \
-            '{version:$version,tag:$tag,url:$url,size:$size,sha256:$sha,published:$published,notes:$notes}' > latest.json
+            --arg page "https://github.com/$REPO/releases/tag/$tag" \
+            '{version:$version,tag:$tag,url:$url,size:$size,sha256:$sha,published:$published,page:$page,notes:$notes}' > latest.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add latest.json
           if ! git diff --cached --quiet; then
             git commit -m "latest.json: $tag"
-            git push
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
