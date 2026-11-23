@@ -144,7 +144,9 @@ function showFiles(list){
     const f=by.get(p);
     return '<a class="file" href="'+esc(f.download_url||f.html_url)+'"><span class="n">'+esc(p)+'</span><span class="d">'+esc(desc[p]||'')+'</span></a>';
   }).join('');
-  if(html)$('files').innerHTML=html;
+  // The API lists the "content" folder, not the file inside it: keep that link too.
+  const full=html+(by.has('content/content.json')?'':'<a class="file" href="https://raw.githubusercontent.com/'+REPO+'/main/content/content.json"><span class="n">content/content.json</span><span class="d">'+desc['content/content.json']+'</span></a>');
+  if(full)$('files').innerHTML=full;
 }
 $('refresh').addEventListener('click',load);
 load();
