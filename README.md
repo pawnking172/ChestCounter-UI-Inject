@@ -8,7 +8,7 @@
 - أحدث نسخة: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
 - تحميل مباشر: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest/download/ChestCounter.exe
 
-زر **Check for updates** داخل البرنامج يفحص هذا الريبو مباشرة؛ أي تعديل جديد ننشره كريليز برقم أعلى و asset اسمه `ChestCounter.exe` ويوصله الزر تلقائياً. بياناتك وإعداداتك محفوظة. لو ما طلع تحديث، الرسالة تعرض رقمك ورقم أحدث إصدار على GitHub عشان تعرف الحالة بالضبط؛ والفحص يجرب رابط الريبو حتى لو كان `CHESTCOUNTER_UPDATE_API` قديم أو غلط. من **Settings → Updates** تشوف رقم النسخة المثبتة وزر **Download the latest build** للتحميل اليدوي.
+زر **Check for updates** يقرأ ملف الريبو الرئيسي `latest.json` أول شيء (فيه رقم أحدث نسخة ورابط التحميل والحجم والـ SHA256 والملاحظات)، ثم يرجع لـ GitHub API كاحتياط. أي ريليز جديد ينشر، سكربت النشر و GitHub Actions يحدّثون `latest.json` لحالهم، فالبرنامج يوصل لأحدث نسخة مهما كان رقم اللي عندك. الإعداد الافتراضي **Installed automatically** ينزّلها ويشغّلها لحاله وهو شغال، والفحص يتكرر كل 5 دقائق بدون ما تفتح البرنامج من جديد. بياناتك وإعداداتك محفوظة. لو ما طلع تحديث، الرسالة تعرض رقمك ورقم أحدث إصدار على GitHub عشان تعرف الحالة بالضبط. من **Settings → Updates** تشوف رقم النسخة المثبتة وزر **Download the latest build** للتحميل اليدوي.
 
 لصديقك: حمّل `ChestCounter.exe` من الرابط المباشر، شغّله (لو طلع SmartScreen: More info → Run anyway)، وبعدين زر **Check for updates** يوصله أي تحديث جديد. `enable-updates.reg` ما يحتاجه لأن الرابط مدمج في النسخة المبنية.
 
