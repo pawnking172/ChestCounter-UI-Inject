@@ -102,8 +102,8 @@ while ($true) {
     # leaves too (8 s of grace covers an update restart). ChestCounter starts a fresh watcher
     # the next time it opens, so nothing is left running in the background.
     if (@(Get-Process -Name ChestCounter -ErrorAction SilentlyContinue).Count -eq 0) {
-        if ($goneSince -eq 0) { $goneSince = [Environment]::TickCount64 }
-        elseif ([Environment]::TickCount64 - $goneSince -gt 8000) { exit }
+        if ($goneSince -eq 0) { $goneSince = [Environment]::TickCount }
+        elseif ([Environment]::TickCount - $goneSince -gt 8000) { exit }
     } else {
         $goneSince = 0
     }
