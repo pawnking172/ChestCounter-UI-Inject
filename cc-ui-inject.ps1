@@ -223,6 +223,17 @@ while ($true) {
             }
         }
 
+        # Prizes ticked as obtained in the report ("Got it" checkbox). The program saves them in
+        # data.json -> Obtained, for this profile (and "" for ticks made before a profile existed).
+        # Without this the all-prizes table showed "—" for prizes the report itself already marks.
+        $ticked = @{}
+        if ($d.Obtained) {
+            foreach ($op in $d.Obtained.PSObject.Properties) {
+                if ($op.Name -ne '' -and $op.Name -ne [string]$profile) { continue }
+                foreach ($id in @($op.Value)) { if ($id) { $ticked[[string]$id] = $true } }
+            }
+        }
+
         # ---- report.html: last line + all-prizes table ----
         if (Test-Path $reportPath) {
             $h = Read-Text $reportPath
@@ -394,6 +405,9 @@ $($friendRows.ToString())
                         } else {
                             $status = "<span style=`"color:#b9821c;font-weight:700`">&#10003; Got it</span> <span class=`"muted`">$note</span>"
                         }
+                    } elseif ($ticked.ContainsKey([string]$p.id)) {
+                        $owned++
+                        $status = "<span style=`"color:#b9821c;font-weight:700`">&#10003; Got it</span> <span class=`"muted`">you ticked it</span>"
                     } else {
                         $status = '<span class="muted">&mdash;</span>'
                     }
