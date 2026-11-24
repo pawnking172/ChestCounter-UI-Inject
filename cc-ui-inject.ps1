@@ -97,6 +97,16 @@ if (-not ('Native.Mem' -as [type])) {
 $passes = 0
 $lastStamp = ''
 while ($true) {
+    # Count *every* loop, including the idle ones that `continue` below. The old counter
+    # lived at the bottom of the loop, so a watcher with nothing to do never trimmed itself
+    # and stayed at ~150 MB in Task Manager.
+    $passes++
+    if ($passes % 20 -eq 0) {
+        # PowerShell 5.1 has no 4-argument Collect and no Aggressive mode: both throw and
+        # kill the loop before EmptyWorkingSet ever runs.
+        try { [System.GC]::Collect([System.GC]::MaxGeneration, [System.GCCollectionMode]::Forced, $true) } catch { }
+        try { [void][Native.Mem]::EmptyWorkingSet((Get-Process -Id $PID).Handle) } catch { }
+    }
     try {
         $stamp = @($dataFile, $cfgFile, $contentFile, $reportPath, $overlayPath) | ForEach-Object {
             $f = Get-Item $_ -ErrorAction SilentlyContinue
@@ -510,13 +520,6 @@ $($rows.ToString())
         }
     } catch {
         # ignore transient read/write races with ChestCounter
-    }
-    # The parsed JSON and the page strings stay in PowerShell's memory after a pass: give
-    # the unused pages back to Windows now and then so the watcher stays small while idle.
-    $passes++
-    if ($passes % 40 -eq 0) {
-        [System.GC]::Collect()
-        try { [void][Native.Mem]::EmptyWorkingSet((Get-Process -Id $PID).Handle) } catch { }
     }
     Start-Sleep -Milliseconds 900
 }
