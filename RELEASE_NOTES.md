@@ -1,6 +1,6 @@
-**English** â€” ChestCounter UI addon build 1.5.58. Fixes the memory that stayed after the web engine stopped.
+**English** â€” ChestCounter UI addon build 1.5.59. Fixes the memory that stayed after the web engine stopped.
 
-**What's new in 1.5.58**
+**What's new in 1.5.59**
 - **Memory actually handed back:** when the page is suspended or the window is minimized for 30 s, the engine's processes end *and* the pages still held by the counter are returned to Windows right away. Previously the Task Manager number stayed high even with no web engine running.
 - **Idle trim even with no page:** after 90 s without touching the window, the counter trims itself every minute whether or not WebView2 is loaded. Clicking restores full speed.
 - **Update popup:** the automatic check still runs every 5 minutes, but it no longer installs in silence. A popup says a new version is available with **Update** and **Later** buttons; nothing is downloaded until you press Update.
@@ -10,9 +10,9 @@
 
 ---
 
-**Franأ§ais** â€” Build 1.5.58 : la mأ©moire rendue quand le moteur web s'arrأھte.
+**Franأ§ais** â€” Build 1.5.59 : la mأ©moire rendue quand le moteur web s'arrأھte.
 
-**Ce qui change en 1.5.58**
+**Ce qui change en 1.5.59**
 - **Mأ©moire rأ©ellement libأ©rأ©e :** quand la page est suspendue ou la fenأھtre minimisأ©e 30 s, les processus du moteur s'arrأھtent *et* les pages gardأ©es par le compteur sont rendues أ  Windows immأ©diatement. Auparavant le chiffre restait أ©levأ© mأھme sans moteur web.
 - **Aprأ¨s 90 s sans toucher la fenأھtre :** le compteur se taille chaque minute, mأھme sans WebView2. Un clic rأ©tablit la vitesse.
 - **Fenأھtre de mise أ  jour :** la vأ©rification automatique reste active toutes les 5 minutes, mais n'installe plus en silence. Une fenأھtre annonce la nouvelle version avec **Mettre أ  jour** et **Plus tard** ; rien n'est tأ©lأ©chargأ© avant ton clic.
@@ -22,9 +22,9 @@
 
 ---
 
-**Espaأ±ol** â€” Build 1.5.58: la memoria se devuelve cuando el motor web se detiene.
+**Espaأ±ol** â€” Build 1.5.59: la memoria se devuelve cuando el motor web se detiene.
 
-**Novedades en 1.5.58**
+**Novedades en 1.5.59**
 - **Memoria realmente liberada:** al suspender la pأ،gina o minimizar 30 s, terminan los procesos del motor *y* las pأ،ginas retenidas por el contador se devuelven a Windows al instante. Antes el nأ؛mero seguأ­a alto aunque no hubiera motor.
 - **Tras 90 s sin tocar la ventana:** el contador se recorta cada minuto, aunque WebView2 no estأ© cargado. Al hacer clic vuelve a la velocidad normal.
 - **Ventana de actualizaciأ³n:** la comprobaciأ³n automأ،tica sigue cada 5 minutos, pero ya no instala en silencio. Una ventana anuncia la versiأ³n nueva con **Actualizar** y **Despuأ©s**; no se descarga nada hasta que pulses el botأ³n.
