@@ -91,6 +91,10 @@ $confirmedText = [string]::Format([Globalization.CultureInfo]::InvariantCulture,
 
 # Stay idle while nothing on disk changes: parsing data.json every second
 # is wasted CPU/RAM on a weak machine. Only wake on a real file change.
+if (-not ('Native.Mem' -as [type])) {
+    Add-Type -MemberDefinition '[System.Runtime.InteropServices.DllImport("psapi.dll")] public static extern bool EmptyWorkingSet(System.IntPtr hProcess);' -Name Mem -Namespace Native -ErrorAction SilentlyContinue
+}
+$passes = 0
 $lastStamp = ''
 while ($true) {
     try {
@@ -382,7 +386,7 @@ $($friendRows.ToString())
                             $suffix = ''
                             if ($uri.Query) { $suffix = '-' + ($uri.Query.TrimStart('?') -replace '[^A-Za-z0-9]', '') }
                             $rel = "images/$base$suffix.webp"
-                            if (Test-Path (Join-Path $dir $rel)) { $thumb = "<img class=`"thumb`" src=`"$rel`" alt=`"`" onerror=`"this.remove()`">" }
+                            if (Test-Path (Join-Path $dir $rel)) { $thumb = "<img class=`"thumb`" src=`"$rel`" alt=`"`" loading=`"lazy`" decoding=`"async`" onerror=`"this.remove()`">" }
                         } catch { }
                     }
                     if ($ownCnt -gt 0) {
@@ -506,6 +510,13 @@ $($rows.ToString())
         }
     } catch {
         # ignore transient read/write races with ChestCounter
+    }
+    # The parsed JSON and the page strings stay in PowerShell's memory after a pass: give
+    # the unused pages back to Windows now and then so the watcher stays small while idle.
+    $passes++
+    if ($passes % 40 -eq 0) {
+        [System.GC]::Collect()
+        try { [void][Native.Mem]::EmptyWorkingSet((Get-Process -Id $PID).Handle) } catch { }
     }
     Start-Sleep -Milliseconds 900
 }
