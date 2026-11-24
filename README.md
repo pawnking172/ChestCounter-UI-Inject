@@ -20,13 +20,13 @@ This is an independent build based on the original open-source project by **LED-
 
 Your data, settings and counted chests are kept between updates.
 
-## Updates: automatic, no work on every release
+## Updates: one click, no work on every release
 
 The counter checks a single file in this repository, [`latest.json`](latest.json), which always names the newest build, its direct download URL, size, SHA-256 checksum and release notes. Every time a release is published, that file is rewritten automatically by the publish script and a GitHub Action — so a new version reaches users without you touching their PC.
 
-- **Check for updates** reads `latest.json` first and falls back to the GitHub API.
-- The default setting, **Installed automatically**, downloads and starts the new build by itself. The app re-checks every 5 minutes while it is open — no restart needed.
-- **Settings → Updates** lets you choose *Installed automatically*, *Offered* or *Off*, shows the installed version and has a **Download the latest build** button.
+- **Check for updates** reads `latest.json` first and falls back to the GitHub API. The check also runs automatically every 5 minutes while the app is open.
+- When a new build is found, a popup offers **Update**, **Download manually** and **Later**. Nothing is downloaded until you choose. If the install fails (blocked download, no write access, antivirus), the exact reason is shown in the window.
+- **Settings → Updates** lets you choose *Check automatically*, *Only when I check* or *Off*, shows the installed version and has a **Download the latest build** button.
 - Older installed builds still find new releases through the GitHub releases API.
 - **New weeks and events, no new exe:** the treasure data file (`content/content.json`) is read from GitHub at startup and every 5 minutes, so a new week, prize ids, events or notices appear in an open counter within seconds. The Activity log confirms it with `Treasure data updated: revision N`.
 
@@ -64,7 +64,7 @@ See [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the full changelog of the current
 - أحدث نسخة: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest
 - تحميل مباشر: https://github.com/pawnking172/ChestCounter-UI-Inject/releases/latest/download/ChestCounter.exe
 
-زر **Check for updates** يقرأ ملف الريبو الرئيسي `latest.json` أول شيء (فيه رقم أحدث نسخة ورابط التحميل والحجم والـ SHA256 والملاحظات)، ثم يرجع لـ GitHub API كاحتياط. أي ريليز جديد ينشر، سكربت النشر و GitHub Actions يحدّثون `latest.json` لحالهم، فالبرنامج يوصل لأحدث نسخة مهما كان رقم اللي عندك. الإعداد الافتراضي **Installed automatically** ينزّلها ويشغّلها لحاله وهو شغال، والفحص يتكرر كل 5 دقائق بدون ما تفتح البرنامج من جديد. بياناتك وإعداداتك محفوظة. لو ما طلع تحديث، الرسالة تعرض رقمك ورقم أحدث إصدار على GitHub عشان تعرف الحالة بالضبط. من **Settings → Updates** تشوف رقم النسخة المثبتة وزر **Download the latest build** للتحميل اليدوي.
+زر **Check for updates** يقرأ ملف الريبو الرئيسي `latest.json` أول شيء (فيه رقم أحدث نسخة ورابط التحميل والحجم والـ SHA256 والملاحظات)، ثم يرجع لـ GitHub API كاحتياط. الفحص يتم لحاله كل 5 دقائق وهو شغال. أي ريليز جديد ينشر، سكربت النشر و GitHub Actions يحدّثون `latest.json` لحالهم. لما يطلع تحديث، نافذة تعرض **Update** و **Download manually** و **Later**؛ ما ينزّل شيء قبل ما تختار. لو فشل التثبيت (تحميل محجوب، صلاحية كتابة، مضاد فيروسات)، السبب بالضبط يظهر داخل النافذة. بياناتك وإعداداتك محفوظة. من **Settings → Updates** تشوف رقم النسخة المثبتة وزر **Download the latest build** للتحميل اليدوي.
 
 لصديقك: حمّل `ChestCounter.exe` من الرابط المباشر، شغّله (لو طلع SmartScreen: More info → Run anyway)، وبعدين زر **Check for updates** يوصله أي تحديث جديد. `enable-updates.reg` ما يحتاجه لأن الرابط مدمج في النسخة المبنية.
 
