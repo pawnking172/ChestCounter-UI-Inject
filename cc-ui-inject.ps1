@@ -96,7 +96,17 @@ if (-not ('Native.Mem' -as [type])) {
 }
 $passes = 0
 $lastStamp = ''
+$goneSince = 0
 while ($true) {
+    # The watcher belongs to the counter: when the counter is really closed, this process
+    # leaves too (8 s of grace covers an update restart). ChestCounter starts a fresh watcher
+    # the next time it opens, so nothing is left running in the background.
+    if (@(Get-Process -Name ChestCounter -ErrorAction SilentlyContinue).Count -eq 0) {
+        if ($goneSince -eq 0) { $goneSince = [Environment]::TickCount64 }
+        elseif ([Environment]::TickCount64 - $goneSince -gt 8000) { exit }
+    } else {
+        $goneSince = 0
+    }
     # Count *every* loop, including the idle ones that `continue` below. The old counter
     # lived at the bottom of the loop, so a watcher with nothing to do never trimmed itself
     # and stayed at ~150 MB in Task Manager.
@@ -521,5 +531,13 @@ $($rows.ToString())
     } catch {
         # ignore transient read/write races with ChestCounter
     }
+    # Top-level loop variables keep the last parsed report and JSON alive until the next
+    # pass, which is why the watcher's private bytes kept climbing. Drop them so the
+    # collection every 20 passes can actually reclaim them.
+    $h = $null; $originalReport = $null; $o = $null; $originalOverlay = $null
+    $d = $null; $cfg = $null; $content = $null; $mine = $null; $last = $null
+    $rows = $null; $newSection = $null; $friendRows = $null; $friendBits = $null
+    $boostBits = $null; $boostByKind = $null; $oddsByKind = $null; $hoursSorted = $null
+    $got = $null; $ticked = $null; $stamp = $null
     Start-Sleep -Milliseconds 900
 }
