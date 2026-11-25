@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "revision": 5,
-  "updated": "2026-11-23",
+  "revision": 6,
+  "updated": "2026-11-25",
   "about": "Treasure hunt data shown by Chest Counter (report, odds, collection). Edit it on main and raise 'revision': every counter picks it up at its next start. Schema in src/ChestCounter/TreasureCatalog.cs.",
   "sources": {
     "odds": "https://x.com/FortniteStatus/status/2119202610322227327",
@@ -397,7 +397,27 @@
       "confirmed": false
     }
   ],
-  "notices": [],
+  "cups": [
+    {
+      "id": "scott-pilgrim-me",
+      "start": "2026-11-25T14:00:00Z",
+      "end": "2026-11-25T18:00:00Z",
+      "name": { "fr": "Scott Pilgrim Cup", "en": "Scott Pilgrim Cup", "es": "Scott Pilgrim Cup" },
+      "reward": { "fr": "Tenue Scott Pilgrim + sac 1-UP pour les meilleurs ; 8 points = émote.", "en": "Scott Pilgrim outfit + 1-UP back bling for top placements; 8 points = emote.", "es": "Traje Scott Pilgrim + mochila 1-UP para los mejores; 8 puntos = emote." },
+      "link": "https://www.fortnite.com/competitive/events/S43_ScottPilgrimCup/schedule?region=ME"
+    }
+  ],
+  "notices": [
+    {
+      "id": "scott-pilgrim-cup-20261125",
+      "from": "2026-11-25T12:00:00Z",
+      "to": "2026-11-25T18:00:00Z",
+      "level": "warning",
+      "title": { "fr": "🏆 Scott Pilgrim Cup aujourd'hui", "en": "🏆 Scott Pilgrim Cup today", "es": "🏆 Scott Pilgrim Cup hoy" },
+      "text": { "fr": "Duos 18h-21h, Mobile 17h-18h15 (heure du Golfe). Les meilleurs gagnent la tenue Scott Pilgrim + le sac 1-UP ; 8 points donnent l'émote. Ouvre l'onglet Compete.", "en": "Duos 6:00-9:00 PM, Mobile 5:00-6:15 PM Gulf time. Top placements win the Scott Pilgrim outfit + 1-UP back bling; 8 points earn the emote. Open the Compete tab.", "es": "Dúos 18:00-21:00, Móvil 17:00-18:15 hora del Golfo. Los mejores ganan el traje Scott Pilgrim + la mochila 1-UP; 8 puntos dan el emote. Abre la pestaña Compete." },
+      "link": "https://www.fortnite.com/competitive/events/S43_ScottPilgrimCup/schedule?region=ME"
+    }
+  ],
   "events": [
     {
       "id": "pirate-token",
@@ -438,6 +458,16 @@
       "benefit": { "fr": "Cinq tenues, véhicules, pistes musicales et écrans de chargement différents à trouver, chaque semaine avec son propre lot.", "en": "Five different outfits, vehicles, jam tracks and loading screens to find, each week with its own set.", "es": "Cinco trajes, vehículos, pistas musicales y pantallas de carga diferentes, cada semana con su propio lote." },
       "token": { "fr": "Le jeton n'est pas hebdomadaire : les mêmes 1/137 500 courent jusqu'à la fin de la chasse, le 5 décembre. Plus tu ouvres de coffres d'ici là, plus tu as de chances.", "en": "The token is not weekly: the same 1/137,500 odds run until the hunt ends on Dec 5. More chests before then means more chances.", "es": "El token no es semanal: las mismas 1/137.500 probabilidades siguen hasta que termine la cacería, el 5 de diciembre. Más cofres antes de eso = más oportunidades." },
       "link": "https://polygon.com/fortnite-pirate-shop-access-token-treasure-odds-revealed"
+    },
+    {
+      "id": "skin-cups",
+      "schedule": "always",
+      "icon": "🏆",
+      "name": { "fr": "Cups à skins", "en": "Skin Cups", "es": "Cups de trajes" },
+      "what": { "fr": "Les tournois Compete donnent parfois la tenue avant la boutique. Aujourd'hui : Scott Pilgrim Cup (ME) — Duos 18h-21h, Mobile 17h-18h15 (heure du Golfe). Vérifie l'onglet Compete pour ta région.", "en": "Compete cups can give an outfit before it hits the Shop. Today: Scott Pilgrim Cup (ME) — Duos 6:00-9:00 PM, Mobile 5:00-6:15 PM Gulf time. Check the Compete tab for your region.", "es": "Las copas Compete pueden dar el traje antes de la tienda. Hoy: Scott Pilgrim Cup (ME) — Dúos 18:00-21:00, Móvil 17:00-18:15 hora del Golfo. Revisa la pestaña Compete para tu región." },
+      "benefit": { "fr": "Les meilleurs reçoivent la tenue Scott Pilgrim + le sac à dos 1-UP ; 8 points (5 en mobile) donnent seulement l'émote Scott !", "en": "Top placements win the Scott Pilgrim outfit + 1-UP back bling; 8 points (5 on mobile) earn only the Scott! emote.", "es": "Los mejores ganan el traje Scott Pilgrim + la mochila 1-UP; 8 puntos (5 en móvil) solo dan el emote Scott!" },
+      "token": { "fr": "Aucun effet sur le jeton pirate (1/137 500) : c'est une autre façon d'avoir une tenue gratuitement.", "en": "No effect on the Pirate Shop token (1/137,500): this is a separate free-outfit route.", "es": "Sin efecto en el token de la tienda pirata (1/137.500): es otra ruta gratuita para conseguir un traje." },
+      "link": "https://www.fortnite.com/competitive/events/S43_ScottPilgrimCup/schedule?region=ME"
     }
   ]
 }
