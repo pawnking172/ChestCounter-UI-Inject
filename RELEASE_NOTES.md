@@ -1,6 +1,6 @@
-**English** — ChestCounter UI addon build 1.5.64. Fixes the memory that stayed after the web engine stopped.
+**English** — ChestCounter UI addon build 1.5.65. Fixes the memory that stayed after the web engine stopped.
 
-**What's new in 1.5.64**
+**What's new in 1.5.65**
 - **Memory actually handed back:** when the page is suspended or the window is minimized for 30 s, the engine's processes end *and* the pages still held by the counter are returned to Windows right away. Previously the Task Manager number stayed high even with no web engine running.
 - **Idle trim even with no page:** after 90 s without touching the window, the counter trims itself every minute whether or not WebView2 is loaded. Clicking restores full speed.
 - **New background:** the picture you chose is now behind the window, with a lighter veil so it actually shows while the text stays readable.
@@ -13,9 +13,9 @@
 
 ---
 
-**Français** — Build 1.5.64 : la mémoire rendue quand le moteur web s'arrête.
+**Français** — Build 1.5.65 : la mémoire rendue quand le moteur web s'arrête.
 
-**Ce qui change en 1.5.64**
+**Ce qui change en 1.5.65**
 - **Mémoire réellement libérée :** quand la page est suspendue ou la fenêtre minimisée 30 s, les processus du moteur s'arrêtent *et* les pages gardées par le compteur sont rendues à Windows immédiatement. Auparavant le chiffre restait élevé même sans moteur web.
 - **Après 90 s sans toucher la fenêtre :** le compteur se taille chaque minute, même sans WebView2. Un clic rétablit la vitesse.
 - **Nouveau fond :** l'image que tu as choisie est maintenant derrière la fenêtre, avec un voile plus léger pour qu'elle se voie vraiment sans gêner la lecture.
@@ -28,9 +28,9 @@
 
 ---
 
-**Español** — Build 1.5.64: la memoria se devuelve cuando el motor web se detiene.
+**Español** — Build 1.5.65: la memoria se devuelve cuando el motor web se detiene.
 
-**Novedades en 1.5.64**
+**Novedades en 1.5.65**
 - **Memoria realmente liberada:** al suspender la página o minimizar 30 s, terminan los procesos del motor *y* las páginas retenidas por el contador se devuelven a Windows al instante. Antes el número seguía alto aunque no hubiera motor.
 - **Tras 90 s sin tocar la ventana:** el contador se recorta cada minuto, aunque WebView2 no esté cargado. Al hacer clic vuelve a la velocidad normal.
 - **Nuevo fondo:** la imagen que elegiste está ahora detrás de la ventana, con un velo más ligero para que se vea sin dificultar la lectura.
